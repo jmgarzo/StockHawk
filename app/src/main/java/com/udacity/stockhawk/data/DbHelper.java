@@ -26,16 +26,31 @@ class DbHelper extends SQLiteOpenHelper {
                 + Quote.COLUMN_PRICE + " REAL NOT NULL, "
                 + Quote.COLUMN_ABSOLUTE_CHANGE + " REAL NOT NULL, "
                 + Quote.COLUMN_PERCENTAGE_CHANGE + " REAL NOT NULL, "
-                + Quote.COLUMN_HISTORY + " TEXT NOT NULL, "
                 + "UNIQUE (" + Quote.COLUMN_SYMBOL + ") ON CONFLICT REPLACE);";
 
         db.execSQL(builder);
+
+        String historyBuilder =  "CREATE TABLE " + Contract.HistoryEntry.TABLE_NAME + " ( " +
+                Contract.HistoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT , " +
+                Contract.HistoryEntry.QUOTE_KEY + " INTEGER NOT NULL , " +
+                Contract.HistoryEntry.DATE + " REAL NOT NULL , " +
+                Contract.HistoryEntry.OPEN + " REAL NOT NULL, " +
+                Contract.HistoryEntry.HIGH + " REAL NOT NULL, " +
+                Contract.HistoryEntry.LOW + " REAL NOT NULL, " +
+                Contract.HistoryEntry.CLOSE + " REAL NOT NULL, " +
+                Contract.HistoryEntry.VOLUME + " INTEGER NOT NULL, " +
+                Contract.HistoryEntry.ADJ_CLOSE + " REAL NOT NULL, " +
+                " FOREIGN KEY (" + Contract.HistoryEntry.QUOTE_KEY + ") REFERENCES " +
+                Quote.TABLE_NAME + " (" + Quote._ID + ") ON DELETE CASCADE " +
+                ");";
+        db.execSQL(historyBuilder);
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        db.execSQL(" DROP TABLE IF EXISTS " + Contract.HistoryEntry.TABLE_NAME);
         db.execSQL(" DROP TABLE IF EXISTS " + Quote.TABLE_NAME);
 
         onCreate(db);

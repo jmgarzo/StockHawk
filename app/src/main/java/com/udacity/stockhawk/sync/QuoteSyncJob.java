@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.objects.History;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,13 +85,12 @@ public final class QuoteSyncJob {
                 // The request will hang forever X_x
                 List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
 
-                StringBuilder historyBuilder = new StringBuilder();
-
+                ArrayList<History> historyList = new ArrayList<>();
                 for (HistoricalQuote it : history) {
-                    historyBuilder.append(it.getDate().getTimeInMillis());
-                    historyBuilder.append(", ");
-                    historyBuilder.append(it.getClose());
-                    historyBuilder.append("\n");
+                    History newHistory = new History(it);
+;
+
+                    historyList.add(newHistory);
                 }
 
                 ContentValues quoteCV = new ContentValues();
@@ -99,16 +100,29 @@ public final class QuoteSyncJob {
                 quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, change);
 
 
-                quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
+
 
                 quoteCVs.add(quoteCV);
+                Uri insertUri = context.getContentResolver().insert(Contract.Quote.URI, quoteCV);
+
+                if (insertUri != null) {
+                    String idQuote = insertUri.getLastPathSegment();
+                    ContentValues[] historyContentValues = new ContentValues[historyList.size()];
+                    for (int i = 0; i < historyList.size(); i++) {
+                        historyList.get(i).setQuoteId(Integer.valueOf(idQuote));
+                        historyContentValues[i] = historyList.get(i).getContentValues();
+                    }
+                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.URI,
+                            historyContentValues);
+                }
+
 
             }
 
-            context.getContentResolver()
-                    .bulkInsert(
-                            Contract.Quote.URI,
-                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
+//            context.getContentResolver()
+//                    .bulkInsert(
+//                            Contract.Quote.URI,
+//                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
 
             Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
             context.sendBroadcast(dataUpdatedIntent);
