@@ -57,6 +57,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (savedInstanceState == null){
+            QuoteSyncJob.initialize(this);
+
+        }
+
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
@@ -66,9 +71,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);
-        onRefresh();
+        //onRefresh();
 
-        QuoteSyncJob.initialize(this);
+        //QuoteSyncJob.initialize(this);
         getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -81,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
                 PrefUtils.removeStock(MainActivity.this, symbol);
-                getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
+                //getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
             }
         }).attachToRecyclerView(stockRecyclerView);
 

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
@@ -31,6 +32,8 @@ import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
 
 public final class QuoteSyncJob {
+
+    private static final String LOG_TAG = QuoteSyncJob.class.getSimpleName();
 
     private static final int ONE_OFF_ID = 2;
     private static final String ACTION_DATA_UPDATED = "com.udacity.stockhawk.ACTION_DATA_UPDATED";
@@ -72,7 +75,11 @@ public final class QuoteSyncJob {
             ArrayList<ContentValues> quoteCVs = new ArrayList<>();
 
             if(iterator.hasNext()){
-                context.getContentResolver().delete(Contract.Quote.URI,null,null);
+               int deleted = context.getContentResolver().delete(Contract.Quote.URI,null,null);
+                Log.d(LOG_TAG, deleted + " Quote Deleted. ");
+                deleted = context.getContentResolver().delete(Contract.HistoryEntry.URI,null,null);
+                Log.d(LOG_TAG, deleted + " History Deleted. ");
+
             }
 
             while (iterator.hasNext()) {
