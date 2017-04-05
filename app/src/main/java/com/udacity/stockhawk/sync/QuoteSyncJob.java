@@ -37,6 +37,7 @@ public final class QuoteSyncJob {
     private static final int PERIOD = 300000;
     private static final int INITIAL_BACKOFF = 10000;
     private static final int PERIODIC_ID = 1;
+
     private static final int YEARS_OF_HISTORY = 2;
 
     private QuoteSyncJob() {
@@ -70,9 +71,13 @@ public final class QuoteSyncJob {
 
             ArrayList<ContentValues> quoteCVs = new ArrayList<>();
 
-            while (iterator.hasNext()) {
-                String symbol = iterator.next();
+            if(iterator.hasNext()){
+                context.getContentResolver().delete(Contract.Quote.URI,null,null);
+            }
 
+            while (iterator.hasNext()) {
+
+                String symbol = iterator.next();
 
                 Stock stock = quotes.get(symbol);
                 StockQuote quote = stock.getQuote();
@@ -88,8 +93,6 @@ public final class QuoteSyncJob {
                 ArrayList<History> historyList = new ArrayList<>();
                 for (HistoricalQuote it : history) {
                     History newHistory = new History(it);
-;
-
                     historyList.add(newHistory);
                 }
 
@@ -98,9 +101,6 @@ public final class QuoteSyncJob {
                 quoteCV.put(Contract.Quote.COLUMN_PRICE, price);
                 quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, percentChange);
                 quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, change);
-
-
-
 
                 quoteCVs.add(quoteCV);
                 Uri insertUri = context.getContentResolver().insert(Contract.Quote.URI, quoteCV);
