@@ -22,6 +22,11 @@ public class StockProvider extends ContentProvider {
     private static final int HISTORY_WITH_ID = 201;
 
 
+    private static final int STOCK = 300;
+    private static final int STOCK_FOR_SYMBOL = 301;
+    private static final int STOCK_WITH_ID = 302;
+
+
     private static final UriMatcher uriMatcher = buildUriMatcher();
 
     private DbHelper dbHelper;
@@ -32,8 +37,12 @@ public class StockProvider extends ContentProvider {
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_WITH_SYMBOL, QUOTE_FOR_SYMBOL);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_WITH_ID, QUOTE_WITH_ID);
 
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_STOCK, STOCK);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_STOCK_WITH_SYMBOL, STOCK_FOR_SYMBOL);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_STOCK_WITH_ID, STOCK_WITH_ID);
+
         matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY,HISTORY);
-        matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY_HITH_ID,HISTORY);
+        matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY_WITH_ID,HISTORY);
         return matcher;
     }
 
@@ -51,9 +60,48 @@ public class StockProvider extends ContentProvider {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         switch (uriMatcher.match(uri)) {
+
+            case STOCK:
+                returnCursor = db.query(
+                        Contract.StockEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+
+            case STOCK_FOR_SYMBOL:
+                returnCursor = db.query(
+                        Contract.StockEntry.TABLE_NAME,
+                        projection,
+                        Contract.StockEntry.COLUMN_SYMBOL + " = ?",
+                        new String[]{uri.getLastPathSegment()},
+                        null,
+                        null,
+                        sortOrder
+                );
+
+                break;
+
+            case STOCK_WITH_ID:
+                returnCursor = db.query(
+                        Contract.StockEntry.TABLE_NAME,
+                        projection,
+                        Contract.StockEntry._ID + " = ?",
+                        new String[]{uri.getPathSegments().get(1)},
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+
+
             case QUOTE:
                 returnCursor = db.query(
-                        Contract.Quote.TABLE_NAME,
+                        Contract.QuoteEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -65,10 +113,10 @@ public class StockProvider extends ContentProvider {
 
             case QUOTE_FOR_SYMBOL:
                 returnCursor = db.query(
-                        Contract.Quote.TABLE_NAME,
+                        Contract.QuoteEntry.TABLE_NAME,
                         projection,
-                        Contract.Quote.COLUMN_SYMBOL + " = ?",
-                        new String[]{Contract.Quote.getStockFromUri(uri)},
+                        Contract.QuoteEntry.COLUMN_SYMBOL + " = ?",
+                        new String[]{Contract.QuoteEntry.getStockFromUri(uri)},
                         null,
                         null,
                         sortOrder
@@ -78,9 +126,9 @@ public class StockProvider extends ContentProvider {
 
             case QUOTE_WITH_ID:
                 returnCursor = db.query(
-                        Contract.Quote.TABLE_NAME,
+                        Contract.QuoteEntry.TABLE_NAME,
                         projection,
-                        Contract.Quote._ID + " = ?",
+                        Contract.QuoteEntry._ID + " = ?",
                         new String[]{uri.getPathSegments().get(1)},
                         null,
                         null,
@@ -111,7 +159,7 @@ public class StockProvider extends ContentProvider {
                 );
                 break;
             default:
-                throw new UnsupportedOperationException("Unknown URI:" + uri);
+                throw new UnsupportedOperationException("Unknown CONTENT_URI:" + uri);
         }
 
         Context context = getContext();
@@ -136,14 +184,28 @@ public class StockProvider extends ContentProvider {
         long id;
 
         switch (uriMatcher.match(uri)) {
-            case QUOTE:
+
+            case STOCK:
                 id = db.insert(
-                        Contract.Quote.TABLE_NAME,
+                        Contract.StockEntry.TABLE_NAME,
                         null,
                         values
                 );
                 if (id > 0) {
-                    returnUri = ContentUris.withAppendedId(Contract.Quote.URI, id);
+                    returnUri = ContentUris.withAppendedId(Contract.StockEntry.CONTENT_URI, id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into: " + uri);
+                }
+                break;
+
+            case QUOTE:
+                id = db.insert(
+                        Contract.QuoteEntry.TABLE_NAME,
+                        null,
+                        values
+                );
+                if (id > 0) {
+                    returnUri = ContentUris.withAppendedId(Contract.QuoteEntry.CONTENT_URI, id);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
                 }
@@ -156,13 +218,13 @@ public class StockProvider extends ContentProvider {
                         values
                 );
                 if (id > 0) {
-                    returnUri = ContentUris.withAppendedId(Contract.Quote.URI, id);
+                    returnUri = ContentUris.withAppendedId(Contract.QuoteEntry.CONTENT_URI, id);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
                 }
                 break;
             default:
-                throw new UnsupportedOperationException("Unknown URI:" + uri);
+                throw new UnsupportedOperationException("Unknown CONTENT_URI:" + uri);
         }
 
         Context context = getContext();
@@ -182,9 +244,36 @@ public class StockProvider extends ContentProvider {
             selection = "1";
         }
         switch (uriMatcher.match(uri)) {
+
+            case STOCK:
+                rowsDeleted = db.delete(
+                        Contract.StockEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs
+                );
+
+                break;
+
+            case STOCK_FOR_SYMBOL:
+                rowsDeleted = db.delete(
+                        Contract.QuoteEntry.TABLE_NAME,
+                        '"' + uri.getLastPathSegment() + '"' + " =" + Contract.StockEntry.COLUMN_SYMBOL,
+                        selectionArgs
+                );
+                break;
+
+            case STOCK_WITH_ID:
+                rowsDeleted = db.delete(
+                        Contract.StockEntry.TABLE_NAME,
+                        '"' + uri.getPathSegments().get(1) + '"' + " = " + Contract.StockEntry._ID,
+                        selectionArgs
+
+                );
+                break;
+
             case QUOTE:
                 rowsDeleted = db.delete(
-                        Contract.Quote.TABLE_NAME,
+                        Contract.QuoteEntry.TABLE_NAME,
                         selection,
                         selectionArgs
                 );
@@ -192,11 +281,20 @@ public class StockProvider extends ContentProvider {
                 break;
 
             case QUOTE_FOR_SYMBOL:
-                String symbol = Contract.Quote.getStockFromUri(uri);
+                String symbol = Contract.QuoteEntry.getStockFromUri(uri);
                 rowsDeleted = db.delete(
-                        Contract.Quote.TABLE_NAME,
-                        '"' + symbol + '"' + " =" + Contract.Quote.COLUMN_SYMBOL,
+                        Contract.QuoteEntry.TABLE_NAME,
+                        '"' + symbol + '"' + " =" + Contract.QuoteEntry.COLUMN_SYMBOL,
                         selectionArgs
+                );
+                break;
+
+            case QUOTE_WITH_ID:
+                rowsDeleted = db.delete(
+                        Contract.QuoteEntry.TABLE_NAME,
+                        '"' + uri.getPathSegments().get(1) + '"' + " = " + Contract.QuoteEntry._ID,
+                        selectionArgs
+
                 );
                 break;
 
@@ -210,13 +308,13 @@ public class StockProvider extends ContentProvider {
 
             case HISTORY_WITH_ID:
                 rowsDeleted = db.delete(
-                        Contract.Quote.TABLE_NAME,
-                        '"' + uri.getPathSegments().get(1) + '"' + " =" + Contract.HistoryEntry._ID,
+                        Contract.HistoryEntry.TABLE_NAME,
+                        '"' + uri.getPathSegments().get(1) + '"' + " = " + Contract.HistoryEntry._ID,
                         selectionArgs
                 );
                 break;
             default:
-                throw new UnsupportedOperationException("Unknown URI:" + uri);
+                throw new UnsupportedOperationException("Unknown CONTENT_URI:" + uri);
         }
 
         if (rowsDeleted != 0) {
@@ -243,13 +341,37 @@ public class StockProvider extends ContentProvider {
         Context context;
 
         switch (uriMatcher.match(uri)) {
+
+            case STOCK:
+                db.beginTransaction();
+                returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        db.insert(
+                                Contract.StockEntry.TABLE_NAME,
+                                null,
+                                value
+                        );
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+
+                context = getContext();
+                if (context != null) {
+                    context.getContentResolver().notifyChange(uri, null);
+                }
+
+                return returnCount;
+
             case QUOTE:
                 db.beginTransaction();
                 returnCount = 0;
                 try {
                     for (ContentValues value : values) {
                         db.insert(
-                                Contract.Quote.TABLE_NAME,
+                                Contract.QuoteEntry.TABLE_NAME,
                                 null,
                                 value
                         );

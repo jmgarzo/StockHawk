@@ -13,6 +13,7 @@ import yahoofinance.histquotes.HistoricalQuote;
 
 public class History {
     private int id;
+    private int quoteKey;//foreign key
     private int quoteId;
     private long date;
     private double open;

@@ -6,9 +6,9 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
@@ -20,14 +20,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import timber.log.Timber;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
-import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
 
@@ -74,10 +72,10 @@ public final class QuoteSyncJob {
 
             ArrayList<ContentValues> quoteCVs = new ArrayList<>();
 
-            if(iterator.hasNext()){
-               int deleted = context.getContentResolver().delete(Contract.Quote.URI,null,null);
-                Log.d(LOG_TAG, deleted + " Quote Deleted. ");
-                deleted = context.getContentResolver().delete(Contract.HistoryEntry.URI,null,null);
+            if (iterator.hasNext()) {
+                int deleted = context.getContentResolver().delete(Contract.QuoteEntry.CONTENT_URI, null, null);
+                Log.d(LOG_TAG, deleted + " QuoteEntry Deleted. ");
+                deleted = context.getContentResolver().delete(Contract.HistoryEntry.URI, null, null);
                 Log.d(LOG_TAG, deleted + " History Deleted. ");
 
             }
@@ -95,41 +93,41 @@ public final class QuoteSyncJob {
 
                 // WARNING! Don't request historical data for a stock that doesn't exist!
                 // The request will hang forever X_x
-                List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
-
-                ArrayList<History> historyList = new ArrayList<>();
-                for (HistoricalQuote it : history) {
-                    History newHistory = new History(it);
-                    historyList.add(newHistory);
-                }
+//                List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
+//
+//                ArrayList<History> historyList = new ArrayList<>();
+//                for (HistoricalQuote it : history) {
+//                    History newHistory = new History(it);
+//                    historyList.add(newHistory);
+//                }
 
                 ContentValues quoteCV = new ContentValues();
-                quoteCV.put(Contract.Quote.COLUMN_SYMBOL, symbol);
-                quoteCV.put(Contract.Quote.COLUMN_PRICE, price);
-                quoteCV.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, percentChange);
-                quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, change);
+                quoteCV.put(Contract.QuoteEntry.COLUMN_SYMBOL, symbol);
+                quoteCV.put(Contract.QuoteEntry.COLUMN_PRICE, price);
+                quoteCV.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, percentChange);
+                quoteCV.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, change);
 
                 quoteCVs.add(quoteCV);
-                Uri insertUri = context.getContentResolver().insert(Contract.Quote.URI, quoteCV);
-
-                if (insertUri != null) {
-                    String idQuote = insertUri.getLastPathSegment();
-                    ContentValues[] historyContentValues = new ContentValues[historyList.size()];
-                    for (int i = 0; i < historyList.size(); i++) {
-                        historyList.get(i).setQuoteId(Integer.valueOf(idQuote));
-                        historyContentValues[i] = historyList.get(i).getContentValues();
-                    }
-                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.URI,
-                            historyContentValues);
-                }
+//                Uri insertUri = context.getContentResolver().insert(Contract.QuoteEntry.CONTENT_URI, quoteCV);
+//
+//                if (insertUri != null) {
+//                    String idQuote = insertUri.getLastPathSegment();
+//                    ContentValues[] historyContentValues = new ContentValues[historyList.size()];
+//                    for (int i = 0; i < historyList.size(); i++) {
+//                        historyList.get(i).setQuoteId(Integer.valueOf(idQuote));
+//                        historyContentValues[i] = historyList.get(i).getContentValues();
+//                    }
+//                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI,
+//                            historyContentValues);
+//                }
 
 
             }
 
-//            context.getContentResolver()
-//                    .bulkInsert(
-//                            Contract.Quote.URI,
-//                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
+            context.getContentResolver()
+                    .bulkInsert(
+                            Contract.QuoteEntry.CONTENT_URI,
+                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
 
             Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
             context.sendBroadcast(dataUpdatedIntent);
@@ -137,6 +135,63 @@ public final class QuoteSyncJob {
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
         }
+    }
+
+    public static void addHistoricalQuotes(Context context) {
+
+        Calendar from = Calendar.getInstance();
+        Calendar to = Calendar.getInstance();
+        from.add(Calendar.YEAR, -1); // from 5 years ago
+
+        ArrayList<String> symbolList = getSymbols(context);
+
+//        for(String sym : symbolList){
+//
+//        }
+//        try {
+//            Stock google = YahooFinance.get(stockSymbol, from, to, Interval.WEEKLY);
+//
+//
+//        } catch (IOException e) {
+//            Timber.e(LOG_TAG + e);
+//            e.printStackTrace();
+//        }
+
+
+    }
+
+    private static ArrayList<History>getHistoricalQuotes(String symbol,Calendar from, Calendar to,
+                                                         Interval interval){
+        ArrayList<History> historyList= null;
+
+        try {
+            Stock  stock = YahooFinance.get(symbol,from,to,interval);
+        } catch (IOException e) {
+            Timber.e(LOG_TAG + e);
+            e.printStackTrace();
+        }
+        return historyList;
+   }
+
+    private static ArrayList<String> getSymbols(Context context) {
+        Cursor cursor = context.getContentResolver().query(
+                Contract.QuoteEntry.CONTENT_URI,
+                new String[]{Contract.QuoteEntry.COLUMN_SYMBOL},
+                null,
+                null,
+                Contract.QuoteEntry.COLUMN_SYMBOL
+        );
+        ArrayList<String> symbolList = null;
+        if (null != cursor && cursor.moveToFirst()) {
+
+            int index = cursor.getColumnIndex(Contract.QuoteEntry.COLUMN_SYMBOL);
+            symbolList = new ArrayList<>();
+            do {
+                symbolList.add(cursor.getString(index));
+            } while (cursor.moveToNext());
+
+        }
+        return symbolList;
     }
 
     private static void schedulePeriodic(Context context) {

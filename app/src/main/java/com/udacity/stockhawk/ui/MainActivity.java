@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
                 PrefUtils.removeStock(MainActivity.this, symbol);
-                //getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
+                //getContentResolver().delete(Contract.QuoteEntry.makeUriForStock(symbol), null, null);
             }
         }).attachToRecyclerView(stockRecyclerView);
 
@@ -143,9 +143,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(this,
-                Contract.Quote.URI,
-                Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{}),
-                null, null, Contract.Quote.COLUMN_SYMBOL);
+                Contract.QuoteEntry.CONTENT_URI,
+                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
+                null, null, Contract.QuoteEntry.COLUMN_SYMBOL);
     }
 
     @Override
@@ -156,6 +156,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             error.setVisibility(View.GONE);
         }
         adapter.setCursor(data);
+
+        //TODO:Lanzar intent para cargar historico
+
     }
 
 

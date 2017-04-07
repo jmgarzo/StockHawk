@@ -10,22 +10,58 @@ import com.google.common.collect.ImmutableList;
 public final class Contract {
 
     static final String AUTHORITY = "com.udacity.stockhawk";
+
+
+    static final String PATH_STOCK = "stock";
+    static final String PATH_STOCK_WITH_SYMBOL = PATH_STOCK + "/*";
+    static final String PATH_STOCK_WITH_ID =  PATH_STOCK + "/#";
+
     static final String PATH_QUOTE = "quote";
-    static final String PATH_QUOTE_WITH_SYMBOL = "quote/*";
-    static final String PATH_QUOTE_WITH_ID = "quote/#";
+    static final String PATH_QUOTE_WITH_SYMBOL = PATH_QUOTE + "/*";
+    static final String PATH_QUOTE_WITH_ID =  PATH_QUOTE + "/#";
 
 
     static final String PATH_HISTORY = "history";
-    static final String PATH_HISTORY_HITH_ID = PATH_HISTORY + "/#";
+    static final String PATH_HISTORY_WITH_ID = PATH_HISTORY + "/#";
     private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
     private Contract() {
     }
 
-    @SuppressWarnings("unused")
-    public static final class Quote implements BaseColumns {
 
-        public static final Uri URI = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
+    public static final class StockEntry implements BaseColumns{
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
+
+        static final String TABLE_NAME = "stock";
+
+        public static final String COLUMN_CURRENCY = "currency";
+        public static final String COLUMN_NAME ="name";
+        public static final String COLUMN_STOCKEXCHANGE = "stockExchange";
+        public static final String COLUMN_SYMBOL = "symbol";
+        public static final int POSITION_ID = 0;
+        public static final int POSITION_NAME = 1;
+        public static final int POSITION_STOCKEXCHANGE = 2;
+        public static final int POSITION_SYMBOL = 3;
+        public static final ImmutableList<String> STOCK_COLUMNS = ImmutableList.of(
+                _ID,
+                COLUMN_CURRENCY,
+                COLUMN_NAME,
+                COLUMN_STOCKEXCHANGE,
+                COLUMN_SYMBOL
+        );
+    }
+
+
+    //@SuppressWarnings("unused")
+    public static final class QuoteEntry implements BaseColumns {
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
+
+        static final String TABLE_NAME = "quotes";
+
+        public static final String STOCK_KEY = "id_stock";
+
         public static final String COLUMN_SYMBOL = "symbol";
         public static final String COLUMN_PRICE = "price";
         public static final String COLUMN_ABSOLUTE_CHANGE = "absolute_change";
@@ -42,10 +78,10 @@ public final class Contract {
                 COLUMN_ABSOLUTE_CHANGE,
                 COLUMN_PERCENTAGE_CHANGE
         );
-        static final String TABLE_NAME = "quotes";
+
 
         public static Uri makeUriForStock(String symbol) {
-            return URI.buildUpon().appendPath(symbol).build();
+            return CONTENT_URI.buildUpon().appendPath(symbol).build();
         }
 
         static String getStockFromUri(Uri queryUri) {

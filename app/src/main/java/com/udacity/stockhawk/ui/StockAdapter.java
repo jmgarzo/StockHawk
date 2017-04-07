@@ -50,7 +50,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
     String getSymbolAtPosition(int position) {
 
         cursor.moveToPosition(position);
-        return cursor.getString(Contract.Quote.POSITION_SYMBOL);
+        return cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL);
     }
 
     @Override
@@ -67,12 +67,12 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         cursor.moveToPosition(position);
 
 
-        holder.symbol.setText(cursor.getString(Contract.Quote.POSITION_SYMBOL));
-        holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.Quote.POSITION_PRICE)));
+        holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
+        holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.QuoteEntry.POSITION_PRICE)));
 
 
-        float rawAbsoluteChange = cursor.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
-        float percentageChange = cursor.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+        float rawAbsoluteChange = cursor.getFloat(Contract.QuoteEntry.POSITION_ABSOLUTE_CHANGE);
+        float percentageChange = cursor.getFloat(Contract.QuoteEntry.POSITION_PERCENTAGE_CHANGE);
 
         if (rawAbsoluteChange > 0) {
             holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
@@ -128,7 +128,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             cursor.moveToPosition(adapterPosition);
-            int idQuote= cursor.getInt(Contract.Quote.POSITION_ID);
+            int idQuote= cursor.getInt(Contract.QuoteEntry.POSITION_ID);
             clickHandler.onClick(idQuote);
 
         }
