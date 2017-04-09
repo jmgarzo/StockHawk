@@ -29,6 +29,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
+import static com.udacity.stockhawk.sync.QuoteSyncJob.addHistoryQuotes;
+
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
         StockAdapter.StockAdapterOnClickHandler {
@@ -159,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //TODO:Lanzar intent para cargar historico
 
+        addHistoryQuotes(this);
     }
 
 

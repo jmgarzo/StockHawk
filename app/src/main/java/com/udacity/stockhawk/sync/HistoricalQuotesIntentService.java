@@ -15,6 +15,6 @@ public class HistoricalQuotesIntentService extends IntentService {
     }
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        QuoteSyncJob.addHistoricalQuotes(this);
+        QuoteSyncJob.addHistoryQuotes(this);
     }
 }

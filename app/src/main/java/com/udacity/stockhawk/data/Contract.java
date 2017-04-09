@@ -16,7 +16,7 @@ public final class Contract {
     static final String PATH_STOCK_WITH_SYMBOL = PATH_STOCK + "/*";
     static final String PATH_STOCK_WITH_ID =  PATH_STOCK + "/#";
 
-    static final String PATH_QUOTE = "quote";
+    static final String PATH_QUOTE = "quotes";
     static final String PATH_QUOTE_WITH_SYMBOL = PATH_QUOTE + "/*";
     static final String PATH_QUOTE_WITH_ID =  PATH_QUOTE + "/#";
 
@@ -31,7 +31,7 @@ public final class Contract {
 
     public static final class StockEntry implements BaseColumns{
 
-        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_STOCK).build();
 
         static final String TABLE_NAME = "stock";
 
@@ -60,19 +60,20 @@ public final class Contract {
 
         static final String TABLE_NAME = "quotes";
 
-        public static final String STOCK_KEY = "id_stock";
-
+        public static final String COLUMN_STOCK_KEY = "id_stock";
         public static final String COLUMN_SYMBOL = "symbol";
         public static final String COLUMN_PRICE = "price";
         public static final String COLUMN_ABSOLUTE_CHANGE = "absolute_change";
         public static final String COLUMN_PERCENTAGE_CHANGE = "percentage_change";
         public static final int POSITION_ID = 0;
-        public static final int POSITION_SYMBOL = 1;
-        public static final int POSITION_PRICE = 2;
-        public static final int POSITION_ABSOLUTE_CHANGE = 3;
-        public static final int POSITION_PERCENTAGE_CHANGE = 4;
+        public static final int POSITION_STOCK_KEY = 1;
+        public static final int POSITION_SYMBOL = 2;
+        public static final int POSITION_PRICE = 3;
+        public static final int POSITION_ABSOLUTE_CHANGE = 4;
+        public static final int POSITION_PERCENTAGE_CHANGE = 5;
         public static final ImmutableList<String> QUOTE_COLUMNS = ImmutableList.of(
                 _ID,
+                COLUMN_STOCK_KEY,
                 COLUMN_SYMBOL,
                 COLUMN_PRICE,
                 COLUMN_ABSOLUTE_CHANGE,
@@ -93,16 +94,17 @@ public final class Contract {
 
     public static final class HistoryEntry implements BaseColumns {
 
-        public static final Uri URI = BASE_URI.buildUpon().appendPath(PATH_HISTORY).build();
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_HISTORY).build();
         public static final String TABLE_NAME = "history";
-        public static final String QUOTE_KEY = "id_quote";
-        public static final String DATE = "date";
-        public static final String OPEN = "open";
-        public static final String HIGH = "high";
-        public static final String LOW = "low";
-        public static final String CLOSE = "close";
-        public static final String VOLUME = "volume";
-        public static final String ADJ_CLOSE = "adj_close";
+        public static final String COLUMN_QUOTE_KEY = "id_quote";
+
+        public static final String COLUMN_DATE = "date";
+        public static final String COLUMN_OPEN = "open";
+        public static final String COLUMN_HIGH = "high";
+        public static final String COLUMN_LOW = "low";
+        public static final String COLUMN_CLOSE = "close";
+        public static final String COLUMN_VOLUME = "volume";
+        public static final String COLUMN_ADJ_CLOSE = "adj_close";
 
         public static final String CONTENT_DIR_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + AUTHORITY + "/" + TABLE_NAME;
@@ -123,14 +125,14 @@ public final class Contract {
 
         public static final ImmutableList<String> HISTORY_COLUMNS = ImmutableList.of(
                 _ID,
-                QUOTE_KEY,
-                DATE,
-                OPEN,
-                HIGH,
-                LOW,
-                CLOSE,
-                VOLUME,
-                ADJ_CLOSE
+                COLUMN_QUOTE_KEY,
+                COLUMN_DATE,
+                COLUMN_OPEN,
+                COLUMN_HIGH,
+                COLUMN_LOW,
+                COLUMN_CLOSE,
+                COLUMN_VOLUME,
+                COLUMN_ADJ_CLOSE
         );
 
     }

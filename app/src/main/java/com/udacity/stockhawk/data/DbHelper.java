@@ -37,27 +37,28 @@ class DbHelper extends SQLiteOpenHelper {
 
         String builder = "CREATE TABLE " + QuoteEntry.TABLE_NAME + " ("
                 + QuoteEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + QuoteEntry.COLUMN_STOCK_KEY + " INTEGER NOT NULL , "
                 + QuoteEntry.COLUMN_SYMBOL + " TEXT NOT NULL, "
                 + QuoteEntry.COLUMN_PRICE + " REAL NOT NULL, "
                 + QuoteEntry.COLUMN_ABSOLUTE_CHANGE + " REAL NOT NULL, "
                 + QuoteEntry.COLUMN_PERCENTAGE_CHANGE + " REAL NOT NULL, " +
-                " FOREIGN KEY (" + Contract.QuoteEntry.QUOTE_KEY + ") REFERENCES " +
-                QuoteEntry.TABLE_NAME + " (" + QuoteEntry._ID + ") ON DELETE CASCADE " +
+                " FOREIGN KEY (" + QuoteEntry.COLUMN_STOCK_KEY + ") REFERENCES " +
+                Contract.StockEntry.TABLE_NAME + " (" + Contract.StockEntry._ID + ") ON DELETE CASCADE " +
                 "UNIQUE (" + Contract.QuoteEntry.COLUMN_SYMBOL + ") ON CONFLICT REPLACE);";
 
         db.execSQL(builder);
 
         String historyBuilder = "CREATE TABLE " + Contract.HistoryEntry.TABLE_NAME + " ( " +
                 Contract.HistoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                Contract.HistoryEntry.QUOTE_KEY + " INTEGER NOT NULL , " +
-                Contract.HistoryEntry.DATE + " REAL NOT NULL , " +
-                Contract.HistoryEntry.OPEN + " REAL NOT NULL, " +
-                Contract.HistoryEntry.HIGH + " REAL NOT NULL, " +
-                Contract.HistoryEntry.LOW + " REAL NOT NULL, " +
-                Contract.HistoryEntry.CLOSE + " REAL NOT NULL, " +
-                Contract.HistoryEntry.VOLUME + " INTEGER NOT NULL, " +
-                Contract.HistoryEntry.ADJ_CLOSE + " REAL NOT NULL, " +
-                " FOREIGN KEY (" + Contract.HistoryEntry.QUOTE_KEY + ") REFERENCES " +
+                Contract.HistoryEntry.COLUMN_QUOTE_KEY + " INTEGER NOT NULL , " +
+                Contract.HistoryEntry.COLUMN_DATE + " REAL NOT NULL , " +
+                Contract.HistoryEntry.COLUMN_OPEN + " REAL NOT NULL, " +
+                Contract.HistoryEntry.COLUMN_HIGH + " REAL NOT NULL, " +
+                Contract.HistoryEntry.COLUMN_LOW + " REAL NOT NULL, " +
+                Contract.HistoryEntry.COLUMN_CLOSE + " REAL NOT NULL, " +
+                Contract.HistoryEntry.COLUMN_VOLUME + " INTEGER NOT NULL, " +
+                Contract.HistoryEntry.COLUMN_ADJ_CLOSE + " REAL NOT NULL, " +
+                " FOREIGN KEY (" + Contract.HistoryEntry.COLUMN_QUOTE_KEY + ") REFERENCES " +
                 QuoteEntry.TABLE_NAME + " (" + QuoteEntry._ID + ") ON DELETE CASCADE " +
                 ");";
         db.execSQL(historyBuilder);

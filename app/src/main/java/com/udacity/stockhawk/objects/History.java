@@ -118,14 +118,14 @@ public class History {
     public ContentValues getContentValues(){
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.HistoryEntry.QUOTE_KEY,quoteId);
-        contentValues.put(Contract.HistoryEntry.DATE,date);
-        contentValues.put(Contract.HistoryEntry.OPEN,open);
-        contentValues.put(Contract.HistoryEntry.HIGH,high);
-        contentValues.put(Contract.HistoryEntry.LOW,low);
-        contentValues.put(Contract.HistoryEntry.CLOSE,close);
-        contentValues.put(Contract.HistoryEntry.VOLUME,volume);
-        contentValues.put(Contract.HistoryEntry.ADJ_CLOSE,adjClose);
+        contentValues.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY,quoteId);
+        contentValues.put(Contract.HistoryEntry.COLUMN_DATE,date);
+        contentValues.put(Contract.HistoryEntry.COLUMN_OPEN,open);
+        contentValues.put(Contract.HistoryEntry.COLUMN_HIGH,high);
+        contentValues.put(Contract.HistoryEntry.COLUMN_LOW,low);
+        contentValues.put(Contract.HistoryEntry.COLUMN_CLOSE,close);
+        contentValues.put(Contract.HistoryEntry.COLUMN_VOLUME,volume);
+        contentValues.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE,adjClose);
 
         return contentValues;
     }

@@ -6,12 +6,9 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
-import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.objects.History;
 
@@ -27,7 +24,6 @@ import timber.log.Timber;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.Interval;
-import yahoofinance.quotes.stock.StockQuote;
 
 public final class QuoteSyncJob {
 
@@ -72,24 +68,20 @@ public final class QuoteSyncJob {
 
             ArrayList<ContentValues> quoteCVs = new ArrayList<>();
 
-            if (iterator.hasNext()) {
-                int deleted = context.getContentResolver().delete(Contract.QuoteEntry.CONTENT_URI, null, null);
-                Log.d(LOG_TAG, deleted + " QuoteEntry Deleted. ");
-                deleted = context.getContentResolver().delete(Contract.HistoryEntry.URI, null, null);
-                Log.d(LOG_TAG, deleted + " History Deleted. ");
-
-            }
+            SyncUtils.cleanDB(context);
 
             while (iterator.hasNext()) {
-
                 String symbol = iterator.next();
-
                 Stock stock = quotes.get(symbol);
-                StockQuote quote = stock.getQuote();
+                if (null != stock)
+                    SyncUtils.addStock(context, stock);
+            }
 
-                float price = quote.getPrice().floatValue();
-                float change = quote.getChange().floatValue();
-                float percentChange = quote.getChangeInPercent().floatValue();
+//                StockQuote quote = stock.getQuote();
+//
+//                float price = quote.getPrice().floatValue();
+//                float change = quote.getChange().floatValue();
+//                float percentChange = quote.getChangeInPercent().floatValue();
 
                 // WARNING! Don't request historical data for a stock that doesn't exist!
                 // The request will hang forever X_x
@@ -101,13 +93,13 @@ public final class QuoteSyncJob {
 //                    historyList.add(newHistory);
 //                }
 
-                ContentValues quoteCV = new ContentValues();
-                quoteCV.put(Contract.QuoteEntry.COLUMN_SYMBOL, symbol);
-                quoteCV.put(Contract.QuoteEntry.COLUMN_PRICE, price);
-                quoteCV.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, percentChange);
-                quoteCV.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, change);
+//                ContentValues quoteCV = new ContentValues();
+//                quoteCV.put(Contract.QuoteEntry.COLUMN_SYMBOL, symbol);
+//                quoteCV.put(Contract.QuoteEntry.COLUMN_PRICE, price);
+//                quoteCV.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, percentChange);
+//                quoteCV.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, change);
 
-                quoteCVs.add(quoteCV);
+//                quoteCVs.add(quoteCV);
 //                Uri insertUri = context.getContentResolver().insert(Contract.QuoteEntry.CONTENT_URI, quoteCV);
 //
 //                if (insertUri != null) {
@@ -122,34 +114,35 @@ public final class QuoteSyncJob {
 //                }
 
 
-            }
+//            }
 
-            context.getContentResolver()
-                    .bulkInsert(
-                            Contract.QuoteEntry.CONTENT_URI,
-                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
-
-            Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
-            context.sendBroadcast(dataUpdatedIntent);
+//            context.getContentResolver()
+//                    .bulkInsert(
+//                            Contract.QuoteEntry.CONTENT_URI,
+//                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
+//
+//            Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
+//            context.sendBroadcast(dataUpdatedIntent);
 
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
         }
     }
 
-    public static void addHistoricalQuotes(Context context) {
+    public static void addHistoryQuotes(Context context) {
+        SyncUtils.addHistory(context);
 
-        Calendar from = Calendar.getInstance();
-        Calendar to = Calendar.getInstance();
-        from.add(Calendar.YEAR, -1); // from 5 years ago
-
-        ArrayList<String> symbolList = getSymbols(context);
-
-//        for(String sym : symbolList){
+//        Calendar from = Calendar.getInstance();
+//        Calendar to = Calendar.getInstance();
+//        from.add(Calendar.YEAR, -1); // from 5 years ago
 //
-//        }
+//        ArrayList<Integer> symbolList = SyncUtils.getQuoteIdDB(context);
+//
+//
+//
+//
 //        try {
-//            Stock google = YahooFinance.get(stockSymbol, from, to, Interval.WEEKLY);
+//            Stock google = YahooFinance.get(sym, from, to, Interval.WEEKLY);
 //
 //
 //        } catch (IOException e) {
@@ -165,7 +158,7 @@ public final class QuoteSyncJob {
         ArrayList<History> historyList= null;
 
         try {
-            Stock  stock = YahooFinance.get(symbol,from,to,interval);
+            Stock stock = YahooFinance.get(symbol,from,to,interval);
         } catch (IOException e) {
             Timber.e(LOG_TAG + e);
             e.printStackTrace();
@@ -173,26 +166,7 @@ public final class QuoteSyncJob {
         return historyList;
    }
 
-    private static ArrayList<String> getSymbols(Context context) {
-        Cursor cursor = context.getContentResolver().query(
-                Contract.QuoteEntry.CONTENT_URI,
-                new String[]{Contract.QuoteEntry.COLUMN_SYMBOL},
-                null,
-                null,
-                Contract.QuoteEntry.COLUMN_SYMBOL
-        );
-        ArrayList<String> symbolList = null;
-        if (null != cursor && cursor.moveToFirst()) {
 
-            int index = cursor.getColumnIndex(Contract.QuoteEntry.COLUMN_SYMBOL);
-            symbolList = new ArrayList<>();
-            do {
-                symbolList.add(cursor.getString(index));
-            } while (cursor.moveToNext());
-
-        }
-        return symbolList;
-    }
 
     private static void schedulePeriodic(Context context) {
         Timber.d("Scheduling a periodic task");

@@ -73,11 +73,11 @@ public class Detail extends AppCompatActivity implements LoaderManager.LoaderCal
         switch (id) {
             case STOCK_LOADER: {
                 return new CursorLoader(this,
-                        Contract.HistoryEntry.URI,
+                        Contract.HistoryEntry.CONTENT_URI,
                         null,
-                        Contract.HistoryEntry.QUOTE_KEY + " = ? ",
+                        Contract.HistoryEntry.COLUMN_QUOTE_KEY + " = ? ",
                         new String[]{Integer.toString(mIdQuote)},
-                        Contract.HistoryEntry.DATE
+                        Contract.HistoryEntry.COLUMN_DATE
                 );
             }
         }
