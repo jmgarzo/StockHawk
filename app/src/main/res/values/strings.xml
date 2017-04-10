@@ -32,7 +32,44 @@
     <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
     <string name="toast_no_connectivity">Will refresh when network available.</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--Settings -->
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="pref_time_interval_label">Time interval</string>
+    <string name="pref_time_interval_key" translatable="false">time_interval</string>
+    <string name="pref_time_interval_default" translatable="false">1_day</string>
+
+    <string name="pref_time_interval_value_1_day" translatable="false">1_day</string>
+    <string name="pref_time_interval_value_5_days" translatable="false">5_days</string>
+    <string name="pref_time_interval_value_1_month" translatable="false">1_month</string>
+    <string name="pref_time_interval_value_3_months" translatable="false">3_months</string>
+    <string name="pref_time_interval_value_6_months" translatable="false">6_months</string>
+    <string name="pref_time_interval_value_1_year" translatable="false">1_year</string>
+    <string name="pref_time_interval_value_2_years" translatable="false">2_years</string>
+    <string name="pref_time_interval_value_5_years" translatable="false">5_years</string>
+
+    <string name="pref_time_interval_label_1_day">1 day</string>
+    <string name="pref_time_interval_label_5_days">5 days</string>
+    <string name="pref_time_interval_label_1_month">1 month</string>
+    <string name="pref_time_interval_label_3_months">3 months</string>
+    <string name="pref_time_interval_label_6_months">6 months</string>
+    <string name="pref_time_interval_label_1_year">1 year</string>
+    <string name="pref_time_interval_label_2_years">2 years</string>
+    <string name="pref_time_interval_label_5_years">5 years</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </resources>

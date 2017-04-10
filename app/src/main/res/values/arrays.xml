@@ -6,4 +6,27 @@
         <item>@string/default_stocks_microsoft</item>
         <item>@string/default_stocks_facebook</item>
     </string-array>
+
+
+    <string-array name="pref_time_interval_options">
+        <item>@string/pref_time_interval_label_1_day</item>
+        <item>@string/pref_time_interval_label_5_days</item>
+        <item>@string/pref_time_interval_label_1_month</item>
+        <item>@string/pref_time_interval_label_3_months</item>
+        <item>@string/pref_time_interval_label_6_months</item>
+        <item>@string/pref_time_interval_label_1_year</item>
+        <item>@string/pref_time_interval_label_2_years</item>
+        <item>@string/pref_time_interval_label_5_years</item>
+    </string-array>
+
+    <string-array name="pref_time_interval_values">
+        <item>@string/pref_time_interval_value_1_day</item>
+        <item>@string/pref_time_interval_value_5_days</item>
+        <item>@string/pref_time_interval_value_1_month</item>
+        <item>@string/pref_time_interval_value_3_months</item>
+        <item>@string/pref_time_interval_value_6_months</item>
+        <item>@string/pref_time_interval_value_1_year</item>
+        <item>@string/pref_time_interval_value_2_years</item>
+        <item>@string/pref_time_interval_value_5_years</item>
+    </string-array>
 </resources>
