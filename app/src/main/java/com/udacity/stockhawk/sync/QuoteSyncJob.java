@@ -83,8 +83,8 @@ public final class QuoteSyncJob {
 //                float change = quote.getChange().floatValue();
 //                float percentChange = quote.getChangeInPercent().floatValue();
 
-                // WARNING! Don't request historical data for a stock that doesn't exist!
-                // The request will hang forever X_x
+            // WARNING! Don't request historical data for a stock that doesn't exist!
+            // The request will hang forever X_x
 //                List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
 //
 //                ArrayList<History> historyList = new ArrayList<>();
@@ -153,19 +153,18 @@ public final class QuoteSyncJob {
 
     }
 
-    private static ArrayList<History>getHistoricalQuotes(String symbol,Calendar from, Calendar to,
-                                                         Interval interval){
-        ArrayList<History> historyList= null;
+    private static ArrayList<History> getHistoricalQuotes(String symbol, Calendar from, Calendar to,
+                                                          Interval interval) {
+        ArrayList<History> historyList = null;
 
         try {
-            Stock stock = YahooFinance.get(symbol,from,to,interval);
+            Stock stock = YahooFinance.get(symbol, from, to, interval);
         } catch (IOException e) {
             Timber.e(LOG_TAG + e);
             e.printStackTrace();
         }
         return historyList;
-   }
-
+    }
 
 
     private static void schedulePeriodic(Context context) {

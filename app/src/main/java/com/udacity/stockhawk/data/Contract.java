@@ -81,6 +81,7 @@ public final class Contract {
         );
 
 
+
         public static Uri makeUriForStock(String symbol) {
             return CONTENT_URI.buildUpon().appendPath(symbol).build();
         }

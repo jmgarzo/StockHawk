@@ -78,33 +78,42 @@ public class SyncUtils {
         Calendar to = Calendar.getInstance();
         from.add(Calendar.YEAR, -1); // from 5 years ago
 
+        if(null != quotesList && quotesList.size()>0) {
 
-        for (MyQuote quote : quotesList) {
-            ContentValues[] cvArray = null;
-            try {
-                Stock stock = YahooFinance.get(quote.getSymbol(), from, to, Interval.WEEKLY);
+            for (MyQuote quote : quotesList) {
+                ContentValues[] cvArray = null;
+                try {
+                    Stock stock = YahooFinance.get(quote.getSymbol(), from, to, Interval.WEEKLY);
 
-                List<HistoricalQuote> historyList = stock.getHistory();
-                cvArray = new ContentValues[historyList.size()];
-                for (HistoricalQuote iq : historyList) {
-                    ContentValues cv = new ContentValues();
-                    cv.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY, quote.getStockId());
-                    cv.put(Contract.HistoryEntry.COLUMN_DATE, iq.getDate().getTimeInMillis());
-                    cv.put(Contract.HistoryEntry.COLUMN_OPEN, iq.getOpen().doubleValue());
-                    cv.put(Contract.HistoryEntry.COLUMN_HIGH, iq.getHigh().doubleValue());
-                    cv.put(Contract.HistoryEntry.COLUMN_LOW, iq.getLow().doubleValue());
-                    cv.put(Contract.HistoryEntry.COLUMN_CLOSE, iq.getClose().doubleValue());
-                    cv.put(Contract.HistoryEntry.COLUMN_VOLUME, iq.getVolume());
-                    cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, iq.getAdjClose().doubleValue());
+                    List<HistoricalQuote> historyList = stock.getHistory();
+                    cvArray = new ContentValues[historyList.size()];
+                    for (int i = 0; historyList.size() > i; i++) {
+
+                        ContentValues cv = new ContentValues();
+
+                        cv.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY, quote.getStockId());
+                        cv.put(Contract.HistoryEntry.COLUMN_DATE, historyList.get(i).getDate().getTimeInMillis());
+                        cv.put(Contract.HistoryEntry.COLUMN_OPEN, historyList.get(i).getOpen().doubleValue());
+                        cv.put(Contract.HistoryEntry.COLUMN_HIGH, historyList.get(i).getHigh().doubleValue());
+                        cv.put(Contract.HistoryEntry.COLUMN_LOW, historyList.get(i).getLow().doubleValue());
+                        cv.put(Contract.HistoryEntry.COLUMN_CLOSE, historyList.get(i).getClose().doubleValue());
+                        cv.put(Contract.HistoryEntry.COLUMN_VOLUME, historyList.get(i).getVolume());
+                        cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, historyList.get(i).getAdjClose().doubleValue());
+
+                        cvArray[i] = cv;
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (null != cvArray && cvArray.length > 0) {
+                    context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI,
+                            Contract.HistoryEntry.COLUMN_QUOTE_KEY + " = ?",
+                            new String[]{Integer.toString(quote.getId())});
+                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI, cvArray);
                 }
 
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            if (null != cvArray && cvArray.length > 0) {
-                context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI, cvArray);
-            }
-
         }
     }
 
@@ -152,9 +161,11 @@ public class SyncUtils {
 
 
     public static ArrayList<MyQuote> getQuotesDB(Context context) {
+        //String selection =
+
         Cursor cursor = context.getContentResolver().query(
                 Contract.QuoteEntry.CONTENT_URI,
-                new String[]{Contract.QuoteEntry.QUOTE_COLUMNS.asList().toString()},
+                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
                 null,
                 null,
                 Contract.QuoteEntry._ID
@@ -162,8 +173,10 @@ public class SyncUtils {
         ArrayList<MyQuote> quoteList = null;
 
         if (null != cursor && cursor.moveToFirst()) {
+            quoteList = new ArrayList<>();
             for (int i = 0; i < cursor.getCount(); i++) {
                 MyQuote quote = new MyQuote(cursor, i);
+
                 quoteList.add(quote);
             }
         }

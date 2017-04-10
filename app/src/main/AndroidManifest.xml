@@ -27,7 +27,7 @@
             android:name=".sync.QuoteIntentService"
             android:exported="false" />
         <service
-            android:name=".sync.HistoricalQuotesIntentService"
+            android:name=".sync.HistoryQuotesIntentService"
             android:exported="false" />
 
         <provider

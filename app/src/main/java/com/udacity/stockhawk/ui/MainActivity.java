@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.sync.HistoryQuotesIntentService;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import butterknife.BindView;
@@ -161,7 +162,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //TODO:Lanzar intent para cargar historico
 
-        addHistoryQuotes(this);
+        Intent addHistoryIntent = new Intent(this, HistoryQuotesIntentService.class);
+        startService(addHistoryIntent);
+
     }
 
 

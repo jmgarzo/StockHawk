@@ -10,6 +10,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import yahoofinance.Stock;
+import yahoofinance.YahooFinance;
+import yahoofinance.quotes.stock.StockQuotesData;
+
 public final class PrefUtils {
 
     private PrefUtils() {
@@ -86,6 +90,10 @@ public final class PrefUtils {
         }
 
         editor.apply();
+    }
+
+    public void getSymbols(){
+
     }
 
 }

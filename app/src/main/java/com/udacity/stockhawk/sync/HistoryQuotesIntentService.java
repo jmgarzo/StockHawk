@@ -8,10 +8,10 @@ import android.support.annotation.Nullable;
  * Created by jmgarzo on 05/04/17.
  */
 
-public class HistoricalQuotesIntentService extends IntentService {
+public class HistoryQuotesIntentService extends IntentService {
 
-    public HistoricalQuotesIntentService(){
-        super("HistoricalQuotesIntentService");
+    public HistoryQuotesIntentService(){
+        super("HistoryQuotesIntentService");
     }
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {

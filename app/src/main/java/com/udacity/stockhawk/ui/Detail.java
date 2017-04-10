@@ -91,7 +91,9 @@ public class Detail extends AppCompatActivity implements LoaderManager.LoaderCal
         }
 
         List<Entry> entries = new ArrayList<Entry>();
-
+        if( null == mHistoryList || mHistoryList.size()<=0){
+            return;
+        }
         for (History his : mHistoryList) {
 
             // turn your data into Entry objects
