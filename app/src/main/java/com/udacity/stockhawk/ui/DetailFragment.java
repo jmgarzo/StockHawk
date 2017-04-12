@@ -58,10 +58,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public static final String ID_QUOTE_TAG = "quote_tag";
 
-    private float mXMax=Float.MIN_VALUE;
-    private float mYMax=Float.MIN_VALUE;
-    private float mXMin=Float.MAX_VALUE;
-    private float mYMin=Float.MAX_VALUE;
+    private float mXMax;
+    private float mYMax;
+    private float mXMin;
+    private float mYMin;
+
+    private String mTimeIntervalPreference;
 
 
     @BindView(R.id.detail_chart)
@@ -75,6 +77,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
 
 
+        mTimeIntervalPreference = PrefUtils.getTimeInterval(getActivity());
+
 
         ButterKnife.bind(this, root);
 
@@ -86,7 +90,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (null != intent) {
             mIdQuote = intent.getIntExtra(ID_QUOTE_TAG, 0);
             Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-            addHistoryIntent.putExtra(ID_QUOTE_TAG,mIdQuote);
+            addHistoryIntent.putExtra(ID_QUOTE_TAG, mIdQuote);
             getActivity().startService(addHistoryIntent);
 
         }
@@ -100,7 +104,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        String timeInterval = PrefUtils.getTimeInterval(getActivity());
 
         switch (id) {
             case STOCK_LOADER: {
@@ -119,6 +122,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
+
+        initMaxAndMinValues();
+        configChart();
 
         if (data != null && data.getCount() > 0) {
             mHistoryList = cursorDataToHistoryList(data);
@@ -157,8 +163,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         xAxis.setTextColor(Color.rgb(255, 192, 56));
         xAxis.setCenterAxisLabels(true);
         //xAxis.setGranularity(1f); // one hour
-        xAxis.setAxisMinimum(mXMin - ((mXMax-mXMin) * 0.05f));
-        xAxis.setAxisMaximum(mXMax + ((mXMax-mXMin) * 0.05f));
+        xAxis.setAxisMinimum(mXMin - ((mXMax - mXMin) * 0.05f));
+        xAxis.setAxisMaximum(mXMax + ((mXMax - mXMin) * 0.05f));
         xAxis.setValueFormatter(new IAxisValueFormatter() {
 
             private SimpleDateFormat mFormat = new SimpleDateFormat("dd MMM");
@@ -178,32 +184,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         leftAxis.setTextColor(ColorTemplate.getHoloBlue());
         leftAxis.setDrawGridLines(true);
         leftAxis.setGranularityEnabled(true);
-        leftAxis.setAxisMinimum(mYMin - ((mYMax-mYMin) * 0.05f));
-        leftAxis.setAxisMaximum(mYMax + ((mYMax-mYMin) * 0.05f));
+        leftAxis.setAxisMinimum(mYMin - ((mYMax - mYMin) * 0.05f));
+        leftAxis.setAxisMaximum(mYMax + ((mYMax - mYMin) * 0.05f));
         leftAxis.setYOffset(-9f);
         leftAxis.setTextColor(Color.rgb(255, 192, 56));
 
         YAxis rightAxis = mLineChart.getAxisRight();
         rightAxis.setEnabled(false);
 
+        mLineChart.invalidate();
+
         Log.d(LOG_TAG, "Fin");
     }
 
-    private void setMaxAndMinValues(History his){
-        if(his.getDate()>mXMax){
-            mXMax = his.getDate();
-        }
-        if(his.getClose()>mYMax){
-            mYMax = (float) his.getClose();
-        }
-        if(his.getDate()<mXMin){
-            mXMin = his.getDate();
-        }
-        if(his.getClose()<mYMin){
-            mYMin = (float) his.getClose();
-        }
-
-    }
 
     private static String getReadableDateString(Context context, long timeInMillis) {
         int flags = DateUtils.FORMAT_SHOW_DATE;
@@ -250,5 +243,39 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    @Override
+    public void onResume() {
 
+        super.onResume();
+        if (!PrefUtils.getTimeInterval(getActivity()).equalsIgnoreCase(mTimeIntervalPreference)) {
+            Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
+            addHistoryIntent.putExtra(ID_QUOTE_TAG, mIdQuote);
+            getActivity().startService(addHistoryIntent);
+            mTimeIntervalPreference = PrefUtils.getTimeInterval(getActivity());
+
+        }
+    }
+
+    private void initMaxAndMinValues() {
+        mXMax = Float.MIN_VALUE;
+        mYMax = Float.MIN_VALUE;
+        mXMin = Float.MAX_VALUE;
+        mYMin = Float.MAX_VALUE;
+    }
+
+    private void setMaxAndMinValues(History his) {
+        if (his.getDate() > mXMax) {
+            mXMax = his.getDate();
+        }
+        if (his.getClose() > mYMax) {
+            mYMax = (float) his.getClose();
+        }
+        if (his.getDate() < mXMin) {
+            mXMin = his.getDate();
+        }
+        if (his.getClose() < mYMin) {
+            mYMin = (float) his.getClose();
+        }
+
+    }
 }

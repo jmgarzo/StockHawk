@@ -42,7 +42,9 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <activity android:name=".ui.Detail"
-            android:parentActivityName=".ui.MainActivity">
+            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleTop"
+            >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
@@ -51,11 +53,11 @@
         <activity
             android:name="com.udacity.stockhawk.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="ui.Detail"
+            android:parentActivityName="com.udacity.stockhawk.ui.Detail"
             android:theme="@style/SettingsTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.Detail" />
+                android:value="com.udacity.stockhawk.ui.Detail" />
         </activity>
     </application>
 

@@ -218,6 +218,7 @@ public class SyncUtils {
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
             }
 
+            return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
         } catch (IOException e) {
             e.printStackTrace();
         }

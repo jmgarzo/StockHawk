@@ -5,6 +5,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.udacity.stockhawk.R;
 
@@ -13,7 +14,7 @@ import com.udacity.stockhawk.R;
  */
 
 public class SettingsActivity extends PreferenceActivity
-        implements Preference.OnPreferenceChangeListener{
+        implements Preference.OnPreferenceChangeListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +42,13 @@ public class SettingsActivity extends PreferenceActivity
         String stringValue = newValue.toString();
 
         if (preference instanceof ListPreference) {
+
+            if (((ListPreference) preference).getValue().toString().equals(newValue)) {
+                Log.d("probando", "prueba");
+            } else {
+                Log.d("probando", "prueba");
+
+            }
             // For list preferences, look up the correct display value in
             // the preference's 'entries' list (since they have separate labels/values).
             ListPreference listPreference = (ListPreference) preference;
@@ -54,4 +62,6 @@ public class SettingsActivity extends PreferenceActivity
         }
         return true;
     }
+
+
 }
