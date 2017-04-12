@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
+import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.objects.MyQuote;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import yahoofinance.quotes.stock.StockQuote;
 public class SyncUtils {
 
     private static String LOG_TAG = SyncUtils.class.getSimpleName();
+
 
     public static void addStock(Context context, Stock stock) {
 
@@ -69,21 +71,26 @@ public class SyncUtils {
     }
 
 
-    public static void addHistory(Context context) {
+    public static void addHistory(Context context, int idQuote) {
 
-        ArrayList<MyQuote> quotesList = getQuotesDB(context);
+        ArrayList<MyQuote> quotesList = getQuoteDB(context, idQuote);
 
 
-        Calendar from = Calendar.getInstance();
-        Calendar to = Calendar.getInstance();
-        from.add(Calendar.YEAR, -1); // from 5 years ago
+//        Calendar from = Calendar.getInstance();
+//        Calendar to = Calendar.getInstance();
 
-        if(null != quotesList && quotesList.size()>0) {
+        //from.add(Calendar.YEAR, -1); // from 5 years ago
+        //from.add(Calendar.DAY_OF_MONTH, -5);
+
+
+        if (null != quotesList && quotesList.size() > 0) {
 
             for (MyQuote quote : quotesList) {
                 ContentValues[] cvArray = null;
                 try {
-                    Stock stock = YahooFinance.get(quote.getSymbol(), from, to, Interval.WEEKLY);
+                    Stock stock = loadStockByPreference(context, quote);
+//                    Stock stock = YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+                    //Stock stock = YahooFinance.get(quote.getSymbol(),true);
 
                     List<HistoricalQuote> historyList = stock.getHistory();
                     cvArray = new ContentValues[historyList.size()];
@@ -99,6 +106,7 @@ public class SyncUtils {
                         cv.put(Contract.HistoryEntry.COLUMN_CLOSE, historyList.get(i).getClose().doubleValue());
                         cv.put(Contract.HistoryEntry.COLUMN_VOLUME, historyList.get(i).getVolume());
                         cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, historyList.get(i).getAdjClose().doubleValue());
+                        cv.put(Contract.HistoryEntry.COLUMN_REGISTRY_TYPE, PrefUtils.getTimeInterval(context));
 
                         cvArray[i] = cv;
                     }
@@ -160,14 +168,14 @@ public class SyncUtils {
     }
 
 
-    public static ArrayList<MyQuote> getQuotesDB(Context context) {
+    public static ArrayList<MyQuote> getQuoteDB(Context context, int idQuote) {
         //String selection =
 
         Cursor cursor = context.getContentResolver().query(
                 Contract.QuoteEntry.CONTENT_URI,
                 Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
-                null,
-                null,
+                Contract.QuoteEntry._ID + " = ?",
+                new String[]{Integer.toString(idQuote)},
                 Contract.QuoteEntry._ID
         );
         ArrayList<MyQuote> quoteList = null;
@@ -181,5 +189,38 @@ public class SyncUtils {
             }
         }
         return quoteList;
+    }
+
+    private static Stock loadStockByPreference(Context context, MyQuote quote) {
+        Calendar from = Calendar.getInstance();
+        Calendar to = Calendar.getInstance();
+        try {
+            if (PrefUtils.is5Days(context)) {
+                from.add(Calendar.DAY_OF_MONTH, -5);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            }else if (PrefUtils.is1Month(context)){
+                from.add(Calendar.MONTH,-1);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            }else if(PrefUtils.is3Month(context)){
+                from.add(Calendar.MONTH,-3);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            }else if(PrefUtils.is6Month(context)){
+                from.add(Calendar.MONTH,-6);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            }else if(PrefUtils.is1Year(context)){
+                from.add(Calendar.YEAR,-1);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            }else if(PrefUtils.is2Year(context)){
+                from.add(Calendar.YEAR,-2);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            } else if(PrefUtils.is5Year(context)){
+                from.add(Calendar.YEAR,-5);
+                return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

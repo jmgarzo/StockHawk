@@ -2,10 +2,12 @@ package com.udacity.stockhawk.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -28,8 +30,11 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
+import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.objects.History;
+import com.udacity.stockhawk.sync.HistoryQuotesIntentService;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +43,8 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.udacity.stockhawk.data.PrefUtils.getTimeInterval;
 
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -51,13 +58,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public static final String ID_QUOTE_TAG = "quote_tag";
 
+    private float mXMax=Float.MIN_VALUE;
+    private float mYMax=Float.MIN_VALUE;
+    private float mXMin=Float.MAX_VALUE;
+    private float mYMin=Float.MAX_VALUE;
+
 
     @BindView(R.id.detail_chart)
     LineChart mLineChart;
-
-
-
-
 
 
     @Override
@@ -66,7 +74,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        ButterKnife.bind(this,root);
+
+
+        ButterKnife.bind(this, root);
 
         configChart();
 
@@ -75,16 +85,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Intent intent = getActivity().getIntent();
         if (null != intent) {
             mIdQuote = intent.getIntExtra(ID_QUOTE_TAG, 0);
+            Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
+            addHistoryIntent.putExtra(ID_QUOTE_TAG,mIdQuote);
+            getActivity().startService(addHistoryIntent);
+
         }
 
         getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
-        return  root;
+        return root;
     }
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        String timeInterval = PrefUtils.getTimeInterval(getActivity());
+
         switch (id) {
             case STOCK_LOADER: {
                 return new CursorLoader(getActivity(),
@@ -101,27 +118,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+
         if (data != null && data.getCount() > 0) {
             mHistoryList = cursorDataToHistoryList(data);
         }
 
         List<Entry> entries = new ArrayList<Entry>();
-        if( null == mHistoryList || mHistoryList.size()<=0){
+        if (null == mHistoryList || mHistoryList.size() <= 0) {
             return;
         }
         for (History his : mHistoryList) {
 
+            setMaxAndMinValues(his);
             // turn your data into Entry objects
             entries.add(new Entry((float) his.getDate(), (float) his.getClose()));
-            Log.d(LOG_TAG, getReadableDateString(getActivity(),his.getDate()));
+            Log.d(LOG_TAG, getReadableDateString(getActivity(), his.getDate()));
         }
-//        entries.add(new Entry(1,2));
-//        entries.add(new Entry(2,5));
-//        entries.add(new Entry(4,1));
-
-
-
-
 
         LineDataSet dataSet = new LineDataSet(entries, "Label");
         dataSet.setColor(R.color.chart_line_pink_accent);
@@ -143,7 +156,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         xAxis.setDrawGridLines(true);
         xAxis.setTextColor(Color.rgb(255, 192, 56));
         xAxis.setCenterAxisLabels(true);
-        xAxis.setGranularity(1f); // one hour
+        //xAxis.setGranularity(1f); // one hour
+        xAxis.setAxisMinimum(mXMin - ((mXMax-mXMin) * 0.05f));
+        xAxis.setAxisMaximum(mXMax + ((mXMax-mXMin) * 0.05f));
         xAxis.setValueFormatter(new IAxisValueFormatter() {
 
             private SimpleDateFormat mFormat = new SimpleDateFormat("dd MMM");
@@ -163,8 +178,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         leftAxis.setTextColor(ColorTemplate.getHoloBlue());
         leftAxis.setDrawGridLines(true);
         leftAxis.setGranularityEnabled(true);
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(170f);
+        leftAxis.setAxisMinimum(mYMin - ((mYMax-mYMin) * 0.05f));
+        leftAxis.setAxisMaximum(mYMax + ((mYMax-mYMin) * 0.05f));
         leftAxis.setYOffset(-9f);
         leftAxis.setTextColor(Color.rgb(255, 192, 56));
 
@@ -172,6 +187,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         rightAxis.setEnabled(false);
 
         Log.d(LOG_TAG, "Fin");
+    }
+
+    private void setMaxAndMinValues(History his){
+        if(his.getDate()>mXMax){
+            mXMax = his.getDate();
+        }
+        if(his.getClose()>mYMax){
+            mYMax = (float) his.getClose();
+        }
+        if(his.getDate()<mXMin){
+            mXMin = his.getDate();
+        }
+        if(his.getClose()<mYMin){
+            mYMin = (float) his.getClose();
+        }
+
     }
 
     private static String getReadableDateString(Context context, long timeInMillis) {
@@ -199,7 +230,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
 
-    private void configChart(){
+    private void configChart() {
         mLineChart.getDescription().setEnabled(false);
 
         // enable touch gestures
@@ -218,12 +249,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mLineChart.setViewPortOffsets(0f, 0f, 0f, 0f);
 
     }
-
-
-
-
-
-
 
 
 }

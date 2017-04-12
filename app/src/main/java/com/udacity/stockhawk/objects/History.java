@@ -22,6 +22,7 @@ public class History {
     private double close;
     private long volume;
     private double adjClose;
+    private String registryType;
 
 
     public History(){};
@@ -35,6 +36,7 @@ public class History {
         setClose(it.getClose().doubleValue());
         setVolume(it.getVolume());
         setAdjClose(it.getAdjClose().doubleValue());
+
     }
 
     public History(Cursor cursor, int position){
@@ -115,6 +117,22 @@ public class History {
         this.adjClose = adjClose;
     }
 
+    public int getQuoteKey() {
+        return quoteKey;
+    }
+
+    public void setQuoteKey(int quoteKey) {
+        this.quoteKey = quoteKey;
+    }
+
+    public String getRegistryType() {
+        return registryType;
+    }
+
+    public void setRegistryType(String registryType) {
+        this.registryType = registryType;
+    }
+
     public ContentValues getContentValues(){
 
         ContentValues contentValues = new ContentValues();
@@ -126,6 +144,7 @@ public class History {
         contentValues.put(Contract.HistoryEntry.COLUMN_CLOSE,close);
         contentValues.put(Contract.HistoryEntry.COLUMN_VOLUME,volume);
         contentValues.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE,adjClose);
+        contentValues.put(Contract.HistoryEntry.COLUMN_REGISTRY_TYPE,registryType);
 
         return contentValues;
     }
@@ -141,6 +160,7 @@ public class History {
         close = cursor.getDouble(Contract.HistoryEntry.POSITION_CLOSE);
         volume = cursor.getLong(Contract.HistoryEntry.POSITION_VOLUME);
         adjClose = cursor.getDouble(Contract.HistoryEntry.POSITION_ADJ_CLOSE);
+        registryType = cursor.getString(Contract.HistoryEntry.POSITION_REGISTRY_TYPE);
 
     }
 }

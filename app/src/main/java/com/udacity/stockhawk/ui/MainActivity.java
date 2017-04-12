@@ -159,12 +159,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             error.setVisibility(View.GONE);
         }
         adapter.setCursor(data);
-
-        //TODO:Lanzar intent para cargar historico
-
-        Intent addHistoryIntent = new Intent(this, HistoryQuotesIntentService.class);
-        startService(addHistoryIntent);
-
     }
 
 

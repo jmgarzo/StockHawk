@@ -92,8 +92,63 @@ public final class PrefUtils {
         editor.apply();
     }
 
-    public void getSymbols(){
+    public static String getTimeInterval(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
+        String result = prefs.getString(context.getString(R.string.pref_time_interval_key),
+                context.getString(R.string.pref_time_interval_default));
+
+        return result;
     }
+
+    public static boolean is5Days(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_5_days)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean is1Month(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_1_month)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean is3Month(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_3_months)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean is6Month(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_6_months)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean is1Year(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_1_year)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean is2Year(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_2_years)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean is5Year(Context context) {
+        if (getTimeInterval(context) == context.getString(R.string.pref_time_interval_value_5_years)) {
+            return true;
+        }
+        return false;
+    }
+
 
 }

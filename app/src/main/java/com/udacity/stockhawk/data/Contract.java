@@ -106,6 +106,7 @@ public final class Contract {
         public static final String COLUMN_CLOSE = "close";
         public static final String COLUMN_VOLUME = "volume";
         public static final String COLUMN_ADJ_CLOSE = "adj_close";
+        public static final String COLUMN_REGISTRY_TYPE = "registry_type";
 
         public static final String CONTENT_DIR_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + AUTHORITY + "/" + TABLE_NAME;
@@ -122,6 +123,7 @@ public final class Contract {
         public static final int POSITION_CLOSE = 6;
         public static final int POSITION_VOLUME = 7;
         public static final int POSITION_ADJ_CLOSE = 8;
+        public static final int POSITION_REGISTRY_TYPE = 9;
 
 
         public static final ImmutableList<String> HISTORY_COLUMNS = ImmutableList.of(
@@ -133,7 +135,8 @@ public final class Contract {
                 COLUMN_LOW,
                 COLUMN_CLOSE,
                 COLUMN_VOLUME,
-                COLUMN_ADJ_CLOSE
+                COLUMN_ADJ_CLOSE,
+                COLUMN_REGISTRY_TYPE
         );
 
     }

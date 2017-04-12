@@ -129,27 +129,12 @@ public final class QuoteSyncJob {
         }
     }
 
-    public static void addHistoryQuotes(Context context) {
-        SyncUtils.addHistory(context);
+    public static void addHitoryQuotes(Context context, int idQuote){
 
-//        Calendar from = Calendar.getInstance();
-//        Calendar to = Calendar.getInstance();
-//        from.add(Calendar.YEAR, -1); // from 5 years ago
-//
-//        ArrayList<Integer> symbolList = SyncUtils.getQuoteIdDB(context);
-//
-//
-//
-//
-//        try {
-//            Stock google = YahooFinance.get(sym, from, to, Interval.WEEKLY);
-//
-//
-//        } catch (IOException e) {
-//            Timber.e(LOG_TAG + e);
-//            e.printStackTrace();
-//        }
+    }
 
+    public static void addHistoryQuotes(Context context,int idQuote) {
+        SyncUtils.addHistory(context,idQuote);
 
     }
 

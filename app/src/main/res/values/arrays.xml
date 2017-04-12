@@ -9,7 +9,6 @@
 
 
     <string-array name="pref_time_interval_options">
-        <item>@string/pref_time_interval_label_1_day</item>
         <item>@string/pref_time_interval_label_5_days</item>
         <item>@string/pref_time_interval_label_1_month</item>
         <item>@string/pref_time_interval_label_3_months</item>
@@ -20,7 +19,6 @@
     </string-array>
 
     <string-array name="pref_time_interval_values">
-        <item>@string/pref_time_interval_value_1_day</item>
         <item>@string/pref_time_interval_value_5_days</item>
         <item>@string/pref_time_interval_value_1_month</item>
         <item>@string/pref_time_interval_value_3_months</item>

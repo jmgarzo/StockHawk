@@ -28,6 +28,7 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.objects.History;
+import com.udacity.stockhawk.sync.HistoryQuotesIntentService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

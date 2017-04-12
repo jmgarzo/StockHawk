@@ -58,6 +58,7 @@ class DbHelper extends SQLiteOpenHelper {
                 Contract.HistoryEntry.COLUMN_CLOSE + " REAL NOT NULL, " +
                 Contract.HistoryEntry.COLUMN_VOLUME + " INTEGER NOT NULL, " +
                 Contract.HistoryEntry.COLUMN_ADJ_CLOSE + " REAL NOT NULL, " +
+                Contract.HistoryEntry.COLUMN_REGISTRY_TYPE + " REAL NOT NULL, " +
                 " FOREIGN KEY (" + Contract.HistoryEntry.COLUMN_QUOTE_KEY + ") REFERENCES " +
                 QuoteEntry.TABLE_NAME + " (" + QuoteEntry._ID + ") ON DELETE CASCADE " +
                 ");";
@@ -68,6 +69,7 @@ class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        db.execSQL(" DROP TABLE IF EXISTS " + Contract.StockEntry.TABLE_NAME);
         db.execSQL(" DROP TABLE IF EXISTS " + Contract.HistoryEntry.TABLE_NAME);
         db.execSQL(" DROP TABLE IF EXISTS " + QuoteEntry.TABLE_NAME);
 
