@@ -31,7 +31,7 @@ public class SyncUtils {
     private static String LOG_TAG = SyncUtils.class.getSimpleName();
 
 
-    public static void addStock(Context context, Stock stock) {
+    public static void addStockAndQuote(Context context, Stock stock) {
 
         ContentValues cvStock = new ContentValues();
         cvStock.put(Contract.StockEntry.COLUMN_CURRENCY, stock.getCurrency());
@@ -91,24 +91,74 @@ public class SyncUtils {
                     Stock stock = loadStockByPreference(context, quote);
 //                    Stock stock = YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
                     //Stock stock = YahooFinance.get(quote.getSymbol(),true);
+                    if (null != stock) {
+                        List<HistoricalQuote> historyList = stock.getHistory();
+                        cvArray = new ContentValues[historyList.size()];
+                        for (int i = 0; historyList.size() > i; i++) {
 
-                    List<HistoricalQuote> historyList = stock.getHistory();
-                    cvArray = new ContentValues[historyList.size()];
-                    for (int i = 0; historyList.size() > i; i++) {
+                            ContentValues cv = new ContentValues();
 
-                        ContentValues cv = new ContentValues();
+                            cv.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY, quote.getStockId());
+                            cv.put(Contract.HistoryEntry.COLUMN_SYMBOL, historyList.get(i).getSymbol());
+                            cv.put(Contract.HistoryEntry.COLUMN_DATE, historyList.get(i).getDate().getTimeInMillis());
+                            cv.put(Contract.HistoryEntry.COLUMN_OPEN, historyList.get(i).getOpen().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_HIGH, historyList.get(i).getHigh().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_LOW, historyList.get(i).getLow().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_CLOSE, historyList.get(i).getClose().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_VOLUME, historyList.get(i).getVolume());
+                            cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, historyList.get(i).getAdjClose().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_REGISTRY_TYPE, PrefUtils.getTimeInterval(context));
 
-                        cv.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY, quote.getStockId());
-                        cv.put(Contract.HistoryEntry.COLUMN_DATE, historyList.get(i).getDate().getTimeInMillis());
-                        cv.put(Contract.HistoryEntry.COLUMN_OPEN, historyList.get(i).getOpen().doubleValue());
-                        cv.put(Contract.HistoryEntry.COLUMN_HIGH, historyList.get(i).getHigh().doubleValue());
-                        cv.put(Contract.HistoryEntry.COLUMN_LOW, historyList.get(i).getLow().doubleValue());
-                        cv.put(Contract.HistoryEntry.COLUMN_CLOSE, historyList.get(i).getClose().doubleValue());
-                        cv.put(Contract.HistoryEntry.COLUMN_VOLUME, historyList.get(i).getVolume());
-                        cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, historyList.get(i).getAdjClose().doubleValue());
-                        cv.put(Contract.HistoryEntry.COLUMN_REGISTRY_TYPE, PrefUtils.getTimeInterval(context));
+                            cvArray[i] = cv;
+                        }
+                    }
 
-                        cvArray[i] = cv;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (null != cvArray && cvArray.length > 0) {
+                    context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI,
+                            Contract.HistoryEntry.COLUMN_QUOTE_KEY + " = ?",
+                            new String[]{Integer.toString(quote.getId())});
+                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI, cvArray);
+                }
+
+            }
+        }
+    }
+
+    public static void addHistory(Context context, String symbol) {
+
+        ArrayList<MyQuote> quotesList = getQuoteDB(context, symbol);
+
+
+        if (null != quotesList && quotesList.size() > 0) {
+
+            for (MyQuote quote : quotesList) {
+                ContentValues[] cvArray = null;
+                try {
+                    Stock stock = loadStockByPreference(context, quote);
+
+                    if (null != stock) {
+                        List<HistoricalQuote> historyList = stock.getHistory();
+                        cvArray = new ContentValues[historyList.size()];
+                        for (int i = 0; historyList.size() > i; i++) {
+
+                            ContentValues cv = new ContentValues();
+
+                            cv.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY, quote.getStockId());
+                            cv.put(Contract.HistoryEntry.COLUMN_SYMBOL, historyList.get(i).getSymbol());
+                            cv.put(Contract.HistoryEntry.COLUMN_DATE, historyList.get(i).getDate().getTimeInMillis());
+                            cv.put(Contract.HistoryEntry.COLUMN_OPEN, historyList.get(i).getOpen().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_HIGH, historyList.get(i).getHigh().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_LOW, historyList.get(i).getLow().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_CLOSE, historyList.get(i).getClose().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_VOLUME, historyList.get(i).getVolume());
+                            cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, historyList.get(i).getAdjClose().doubleValue());
+                            cv.put(Contract.HistoryEntry.COLUMN_REGISTRY_TYPE, PrefUtils.getTimeInterval(context));
+
+                            cvArray[i] = cv;
+                        }
                     }
 
                 } catch (IOException e) {
@@ -191,6 +241,27 @@ public class SyncUtils {
         return quoteList;
     }
 
+    public static ArrayList<MyQuote> getQuoteDB(Context context, String symbol) {
+
+        Cursor cursor = context.getContentResolver().query(
+                Contract.QuoteEntry.CONTENT_URI,
+                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
+                Contract.QuoteEntry.COLUMN_SYMBOL + " = ?",
+                new String[]{symbol},
+                Contract.QuoteEntry._ID
+        );
+        ArrayList<MyQuote> quoteList = null;
+
+        if (null != cursor && cursor.moveToFirst()) {
+            quoteList = new ArrayList<>();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                MyQuote quote = new MyQuote(cursor, i);
+                quoteList.add(quote);
+            }
+        }
+        return quoteList;
+    }
+
     private static Stock loadStockByPreference(Context context, MyQuote quote) {
         Calendar from = Calendar.getInstance();
         Calendar to = Calendar.getInstance();
@@ -198,23 +269,23 @@ public class SyncUtils {
             if (PrefUtils.is5Days(context)) {
                 from.add(Calendar.DAY_OF_MONTH, -5);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-            }else if (PrefUtils.is1Month(context)){
-                from.add(Calendar.MONTH,-1);
+            } else if (PrefUtils.is1Month(context)) {
+                from.add(Calendar.MONTH, -1);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-            }else if(PrefUtils.is3Month(context)){
-                from.add(Calendar.MONTH,-3);
+            } else if (PrefUtils.is3Month(context)) {
+                from.add(Calendar.MONTH, -3);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-            }else if(PrefUtils.is6Month(context)){
-                from.add(Calendar.MONTH,-6);
+            } else if (PrefUtils.is6Month(context)) {
+                from.add(Calendar.MONTH, -6);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-            }else if(PrefUtils.is1Year(context)){
-                from.add(Calendar.YEAR,-1);
+            } else if (PrefUtils.is1Year(context)) {
+                from.add(Calendar.YEAR, -1);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-            }else if(PrefUtils.is2Year(context)){
-                from.add(Calendar.YEAR,-2);
+            } else if (PrefUtils.is2Year(context)) {
+                from.add(Calendar.YEAR, -2);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-            } else if(PrefUtils.is5Year(context)){
-                from.add(Calendar.YEAR,-5);
+            } else if (PrefUtils.is5Year(context)) {
+                from.add(Calendar.YEAR, -5);
                 return YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
             }
 

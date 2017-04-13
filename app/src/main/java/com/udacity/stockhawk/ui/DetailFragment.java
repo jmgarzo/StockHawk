@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -52,11 +53,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
 
 
-    private int mIdQuote;
+    private String mSymbol;
     private ArrayList<History> mHistoryList;
     private static final int STOCK_LOADER = 0;
 
-    public static final String ID_QUOTE_TAG = "quote_tag";
+//    public static final String ID_QUOTE_TAG = "quote_tag";
 
     private float mXMax;
     private float mYMax;
@@ -68,17 +69,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @BindView(R.id.detail_chart)
     LineChart mLineChart;
+    @BindView(R.id.pb_loading_indicator)
+    ProgressBar mLoadingIndicator;
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
 
-
         mTimeIntervalPreference = PrefUtils.getTimeInterval(getActivity());
-
 
         ButterKnife.bind(this, root);
 
@@ -88,9 +91,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         Intent intent = getActivity().getIntent();
         if (null != intent) {
-            mIdQuote = intent.getIntExtra(ID_QUOTE_TAG, 0);
+            mSymbol = intent.getStringExtra(Intent.EXTRA_TEXT);
             Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-            addHistoryIntent.putExtra(ID_QUOTE_TAG, mIdQuote);
+            addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
             getActivity().startService(addHistoryIntent);
 
         }
@@ -104,14 +107,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
+        mLoadingIndicator.setVisibility(View.VISIBLE);
 
         switch (id) {
             case STOCK_LOADER: {
                 return new CursorLoader(getActivity(),
                         Contract.HistoryEntry.CONTENT_URI,
-                        null,
-                        Contract.HistoryEntry.COLUMN_QUOTE_KEY + " = ? ",
-                        new String[]{Integer.toString(mIdQuote)},
+                        Contract.HistoryEntry.HISTORY_COLUMNS.toArray(new String[]{}),
+                        Contract.HistoryEntry.COLUMN_SYMBOL + " = ? ",
+                        new String[]{mSymbol},
                         Contract.HistoryEntry.COLUMN_DATE
                 );
             }
@@ -193,6 +197,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         rightAxis.setEnabled(false);
 
         mLineChart.invalidate();
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
 
         Log.d(LOG_TAG, "Fin");
     }
@@ -248,8 +253,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         super.onResume();
         if (!PrefUtils.getTimeInterval(getActivity()).equalsIgnoreCase(mTimeIntervalPreference)) {
+            mLoadingIndicator.setVisibility(View.VISIBLE);
             Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-            addHistoryIntent.putExtra(ID_QUOTE_TAG, mIdQuote);
+            addHistoryIntent.putExtra(Intent.EXTRA_TEXT,mSymbol);
             getActivity().startService(addHistoryIntent);
             mTimeIntervalPreference = PrefUtils.getTimeInterval(getActivity());
 

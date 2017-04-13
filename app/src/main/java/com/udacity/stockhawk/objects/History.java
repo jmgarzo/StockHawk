@@ -14,6 +14,7 @@ import yahoofinance.histquotes.HistoricalQuote;
 public class History {
     private int id;
     private int quoteKey;//foreign key
+    private String symbol;
     private int quoteId;
     private long date;
     private double open;
@@ -28,7 +29,7 @@ public class History {
     public History(){};
 
     public History(HistoricalQuote it){
-
+        setSymbol(it.getSymbol());
         setDate(it.getDate().getTimeInMillis());
         setOpen(it.getOpen().doubleValue());
         setHigh(it.getHigh().doubleValue());
@@ -59,6 +60,14 @@ public class History {
 
     public void setQuoteId(int quoteId) {
         this.quoteId = quoteId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     public long getDate() {
@@ -137,6 +146,7 @@ public class History {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY,quoteId);
+        contentValues.put(Contract.HistoryEntry.COLUMN_SYMBOL,symbol);
         contentValues.put(Contract.HistoryEntry.COLUMN_DATE,date);
         contentValues.put(Contract.HistoryEntry.COLUMN_OPEN,open);
         contentValues.put(Contract.HistoryEntry.COLUMN_HIGH,high);
@@ -153,6 +163,7 @@ public class History {
 
         id = cursor.getInt(Contract.HistoryEntry.POSITION_ID);
         quoteId = cursor.getInt(Contract.HistoryEntry.POSITION_QUOTE_KEY);
+        symbol = cursor.getString(Contract.HistoryEntry.POSITION_SYMBOL);
         date = cursor.getLong(Contract.HistoryEntry.POSITION_DATE);
         open = cursor.getDouble(Contract.HistoryEntry.POSITION_OPEN);
         high = cursor.getDouble(Contract.HistoryEntry.POSITION_HIGH);

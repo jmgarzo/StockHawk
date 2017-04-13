@@ -3,7 +3,6 @@ package com.udacity.stockhawk.sync;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -40,7 +39,7 @@ public final class QuoteSyncJob {
     private QuoteSyncJob() {
     }
 
-    static void getQuotes(Context context) {
+    static void getQuotesAndStocks(Context context) {
 
         Timber.d("Running sync job");
 
@@ -66,15 +65,15 @@ public final class QuoteSyncJob {
 
             Timber.d(quotes.toString());
 
-            ArrayList<ContentValues> quoteCVs = new ArrayList<>();
-
-            SyncUtils.cleanDB(context);
+            if (iterator.hasNext()) {
+                SyncUtils.cleanDB(context);
+            }
 
             while (iterator.hasNext()) {
                 String symbol = iterator.next();
                 Stock stock = quotes.get(symbol);
                 if (null != stock)
-                    SyncUtils.addStock(context, stock);
+                    SyncUtils.addStockAndQuote(context, stock);
             }
 
 //                StockQuote quote = stock.getQuote();
@@ -129,15 +128,17 @@ public final class QuoteSyncJob {
         }
     }
 
-    public static void addHitoryQuotes(Context context, int idQuote){
+
+
+    public static void addHistoryQuotes(Context context, int idQuote) {
+        SyncUtils.addHistory(context, idQuote);
 
     }
 
-    public static void addHistoryQuotes(Context context,int idQuote) {
-        SyncUtils.addHistory(context,idQuote);
+    public static void addHistoryQuotes(Context context, String symbol) {
+        SyncUtils.addHistory(context, symbol);
 
     }
-
     private static ArrayList<History> getHistoricalQuotes(String symbol, Calendar from, Calendar to,
                                                           Interval interval) {
         ArrayList<History> historyList = null;

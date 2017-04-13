@@ -18,7 +18,7 @@ public class HistoryQuotesIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        int idQuote = intent.getIntExtra(DetailFragment.ID_QUOTE_TAG,0);
-        QuoteSyncJob.addHistoryQuotes(this, idQuote);
+        String symbol = intent.getStringExtra(Intent.EXTRA_TEXT);
+        QuoteSyncJob.addHistoryQuotes(this, symbol);
     }
 }

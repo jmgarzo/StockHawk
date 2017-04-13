@@ -21,9 +21,6 @@ class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-
-        ;
-
         String stockBuilder = "CREATE TABLE " + Contract.StockEntry.TABLE_NAME + " ("
                 + Contract.StockEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + Contract.StockEntry.COLUMN_CURRENCY + " TEXT NOT NULL, "
@@ -45,12 +42,12 @@ class DbHelper extends SQLiteOpenHelper {
                 " FOREIGN KEY (" + QuoteEntry.COLUMN_STOCK_KEY + ") REFERENCES " +
                 Contract.StockEntry.TABLE_NAME + " (" + Contract.StockEntry._ID + ") ON DELETE CASCADE " +
                 "UNIQUE (" + Contract.QuoteEntry.COLUMN_SYMBOL + ") ON CONFLICT REPLACE);";
-
         db.execSQL(builder);
 
         String historyBuilder = "CREATE TABLE " + Contract.HistoryEntry.TABLE_NAME + " ( " +
                 Contract.HistoryEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT , " +
                 Contract.HistoryEntry.COLUMN_QUOTE_KEY + " INTEGER NOT NULL , " +
+                Contract.HistoryEntry.COLUMN_SYMBOL + " TEXT NOT NULL, " +
                 Contract.HistoryEntry.COLUMN_DATE + " REAL NOT NULL , " +
                 Contract.HistoryEntry.COLUMN_OPEN + " REAL NOT NULL, " +
                 Contract.HistoryEntry.COLUMN_HIGH + " REAL NOT NULL, " +
@@ -63,7 +60,6 @@ class DbHelper extends SQLiteOpenHelper {
                 QuoteEntry.TABLE_NAME + " (" + QuoteEntry._ID + ") ON DELETE CASCADE " +
                 ");";
         db.execSQL(historyBuilder);
-
     }
 
     @Override

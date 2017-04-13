@@ -98,7 +98,7 @@ public final class Contract {
         public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_HISTORY).build();
         public static final String TABLE_NAME = "history";
         public static final String COLUMN_QUOTE_KEY = "id_quote";
-
+        public static final String COLUMN_SYMBOL = "symbol";
         public static final String COLUMN_DATE = "date";
         public static final String COLUMN_OPEN = "open";
         public static final String COLUMN_HIGH = "high";
@@ -116,19 +116,21 @@ public final class Contract {
 
         public static final int POSITION_ID = 0;
         public static final int POSITION_QUOTE_KEY = 1;
-        public static final int POSITION_DATE = 2;
-        public static final int POSITION_OPEN = 3;
-        public static final int POSITION_HIGH = 4;
-        public static final int POSITION_LOW = 5;
-        public static final int POSITION_CLOSE = 6;
-        public static final int POSITION_VOLUME = 7;
-        public static final int POSITION_ADJ_CLOSE = 8;
-        public static final int POSITION_REGISTRY_TYPE = 9;
+        public static final int POSITION_SYMBOL=2;
+        public static final int POSITION_DATE = 3;
+        public static final int POSITION_OPEN = 4;
+        public static final int POSITION_HIGH = 5;
+        public static final int POSITION_LOW = 6;
+        public static final int POSITION_CLOSE = 7;
+        public static final int POSITION_VOLUME = 8;
+        public static final int POSITION_ADJ_CLOSE = 9;
+        public static final int POSITION_REGISTRY_TYPE = 10;
 
 
         public static final ImmutableList<String> HISTORY_COLUMNS = ImmutableList.of(
                 _ID,
                 COLUMN_QUOTE_KEY,
+                COLUMN_SYMBOL,
                 COLUMN_DATE,
                 COLUMN_OPEN,
                 COLUMN_HIGH,
