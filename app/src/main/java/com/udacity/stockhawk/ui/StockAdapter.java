@@ -2,6 +2,7 @@ package com.udacity.stockhawk.ui;
 
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -66,10 +67,10 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
         cursor.moveToPosition(position);
 
-        if(cursor.getDouble(Contract.QuoteEntry.POSITION_PRICE)==-1){
+        if(cursor.getDouble(Contract.QuoteEntry.POSITION_PRICE) ==- 1 && cursor.getDouble(Contract.QuoteEntry.POSITION_PERCENTAGE_CHANGE) == -1){
             holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
-            holder.price.setText(context.getString(R.string.non_existent_value));
-            holder.change.setText(context.getString(R.string.non_existent_value));
+            holder.price.setText("");
+            holder.change.setText("");
         }else {
             holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
             holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.QuoteEntry.POSITION_PRICE)));
