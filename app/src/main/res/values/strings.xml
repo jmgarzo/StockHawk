@@ -17,6 +17,8 @@
     <string name="default_stocks_microsoft">MSFT</string>
     <string name="default_stocks_facebook">FB</string>
 
+    <string name="non_existent_value">non-existent</string>
+
 
     <string name="action_change_units">@string/pref_display_mode_key</string>
 
@@ -56,6 +58,9 @@
     <string name="pref_time_interval_label_1_year">1 year</string>
     <string name="pref_time_interval_label_2_years">2 years</string>
     <string name="pref_time_interval_label_5_years">5 years</string>
+
+    <!--Content description strings -->
+    <string name="add_new_stock">Add new stock</string>
 
 
 

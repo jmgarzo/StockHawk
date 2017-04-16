@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.objects.MyQuote;
@@ -33,26 +34,52 @@ public class SyncUtils {
 
     public static void addStockAndQuote(Context context, Stock stock) {
 
-        ContentValues cvStock = new ContentValues();
-        cvStock.put(Contract.StockEntry.COLUMN_CURRENCY, stock.getCurrency());
-        cvStock.put(Contract.StockEntry.COLUMN_NAME, stock.getName());
-        cvStock.put(Contract.StockEntry.COLUMN_STOCKEXCHANGE, stock.getStockExchange());
-        cvStock.put(Contract.StockEntry.COLUMN_SYMBOL, stock.getSymbol());
+        if (null == stock.getStockExchange()) {
+            ContentValues cvStock = new ContentValues();
+            cvStock.put(Contract.StockEntry.COLUMN_CURRENCY, context.getString(R.string.non_existent_value));
+            cvStock.put(Contract.StockEntry.COLUMN_NAME, context.getString(R.string.non_existent_value));
+            cvStock.put(Contract.StockEntry.COLUMN_STOCKEXCHANGE, -1);
+            cvStock.put(Contract.StockEntry.COLUMN_SYMBOL, stock.getSymbol());
 
-        Uri quoteUri = context.getContentResolver().insert(Contract.StockEntry.CONTENT_URI, cvStock);
-        String quoteId = quoteUri.getLastPathSegment();
+            Uri quoteUri = context.getContentResolver().insert(Contract.StockEntry.CONTENT_URI, cvStock);
+            String quoteId = quoteUri.getLastPathSegment();
 
-        StockQuote quote = stock.getQuote();
+            StockQuote quote = stock.getQuote();
 
 
-        ContentValues cvQuote = new ContentValues();
-        cvQuote.put(Contract.QuoteEntry.COLUMN_STOCK_KEY, quoteId);
-        cvQuote.put(Contract.QuoteEntry.COLUMN_SYMBOL, quote.getSymbol());
-        cvQuote.put(Contract.QuoteEntry.COLUMN_PRICE, quote.getPrice().doubleValue());
-        cvQuote.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, quote.getChange().doubleValue());
-        cvQuote.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, quote.getChangeInPercent().doubleValue());
+            ContentValues cvQuote = new ContentValues();
+            cvQuote.put(Contract.QuoteEntry.COLUMN_STOCK_KEY, quoteId);
+            cvQuote.put(Contract.QuoteEntry.COLUMN_SYMBOL, quote.getSymbol() + " " +
+                    context.getString(R.string.non_existent_value));
+            cvQuote.put(Contract.QuoteEntry.COLUMN_PRICE, -1);
+            cvQuote.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, -1);
+            cvQuote.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, -1);
 
-        context.getContentResolver().insert(Contract.QuoteEntry.CONTENT_URI, cvQuote);
+            context.getContentResolver().insert(Contract.QuoteEntry.CONTENT_URI, cvQuote);
+
+        } else {
+            ContentValues cvStock = new ContentValues();
+            cvStock.put(Contract.StockEntry.COLUMN_CURRENCY, stock.getCurrency());
+            cvStock.put(Contract.StockEntry.COLUMN_NAME, stock.getName());
+            cvStock.put(Contract.StockEntry.COLUMN_STOCKEXCHANGE, stock.getStockExchange());
+            cvStock.put(Contract.StockEntry.COLUMN_SYMBOL, stock.getSymbol());
+
+            Uri quoteUri = context.getContentResolver().insert(Contract.StockEntry.CONTENT_URI, cvStock);
+            String quoteId = quoteUri.getLastPathSegment();
+
+            StockQuote quote = stock.getQuote();
+
+
+            ContentValues cvQuote = new ContentValues();
+            cvQuote.put(Contract.QuoteEntry.COLUMN_STOCK_KEY, quoteId);
+            cvQuote.put(Contract.QuoteEntry.COLUMN_SYMBOL, quote.getSymbol());
+            cvQuote.put(Contract.QuoteEntry.COLUMN_PRICE, quote.getPrice().doubleValue());
+            cvQuote.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, quote.getChange().doubleValue());
+            cvQuote.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE,
+                    quote.getChangeInPercent().doubleValue());
+
+            context.getContentResolver().insert(Contract.QuoteEntry.CONTENT_URI, cvQuote);
+        }
 
     }
 

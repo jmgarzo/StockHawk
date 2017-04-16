@@ -66,28 +66,33 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
         cursor.moveToPosition(position);
 
+        if(cursor.getDouble(Contract.QuoteEntry.POSITION_PRICE)==-1){
+            holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
+            holder.price.setText(context.getString(R.string.non_existent_value));
+            holder.change.setText(context.getString(R.string.non_existent_value));
+        }else {
+            holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
+            holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.QuoteEntry.POSITION_PRICE)));
 
-        holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
-        holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.QuoteEntry.POSITION_PRICE)));
 
+            float rawAbsoluteChange = cursor.getFloat(Contract.QuoteEntry.POSITION_ABSOLUTE_CHANGE);
+            float percentageChange = cursor.getFloat(Contract.QuoteEntry.POSITION_PERCENTAGE_CHANGE);
 
-        float rawAbsoluteChange = cursor.getFloat(Contract.QuoteEntry.POSITION_ABSOLUTE_CHANGE);
-        float percentageChange = cursor.getFloat(Contract.QuoteEntry.POSITION_PERCENTAGE_CHANGE);
+            if (rawAbsoluteChange > 0) {
+                holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
+            } else {
+                holder.change.setBackgroundResource(R.drawable.percent_change_pill_red);
+            }
 
-        if (rawAbsoluteChange > 0) {
-            holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
-        } else {
-            holder.change.setBackgroundResource(R.drawable.percent_change_pill_red);
-        }
+            String change = dollarFormatWithPlus.format(rawAbsoluteChange);
+            String percentage = percentageFormat.format(percentageChange / 100);
 
-        String change = dollarFormatWithPlus.format(rawAbsoluteChange);
-        String percentage = percentageFormat.format(percentageChange / 100);
-
-        if (PrefUtils.getDisplayMode(context)
-                .equals(context.getString(R.string.pref_display_mode_absolute_key))) {
-            holder.change.setText(change);
-        } else {
-            holder.change.setText(percentage);
+            if (PrefUtils.getDisplayMode(context)
+                    .equals(context.getString(R.string.pref_display_mode_absolute_key))) {
+                holder.change.setText(change);
+            } else {
+                holder.change.setText(percentage);
+            }
         }
 
 
