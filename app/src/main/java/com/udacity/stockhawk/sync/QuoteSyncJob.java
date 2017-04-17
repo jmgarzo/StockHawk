@@ -129,11 +129,11 @@ public final class QuoteSyncJob {
     }
 
 
-
-    public static void addHistoryQuotes(Context context, int idQuote) {
-        SyncUtils.addHistory(context, idQuote);
-
-    }
+//TODO: Eliminar si no se cambiar el metodo addHistory
+//    public static void addHistoryQuotes(Context context, int idQuote) {
+//        SyncUtils.addHistory(context, idQuote);
+//
+//    }
 
     public static void addHistoryQuotes(Context context, String symbol) {
         SyncUtils.addHistory(context, symbol);

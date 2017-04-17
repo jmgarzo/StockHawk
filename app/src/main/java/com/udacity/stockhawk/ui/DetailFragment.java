@@ -73,7 +73,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     ProgressBar mLoadingIndicator;
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -130,9 +129,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         initMaxAndMinValues();
         configChart();
 
-        if (data != null && data.getCount() > 0) {
-            mHistoryList = cursorDataToHistoryList(data);
+        if (data == null || data.getCount() <= 0) {
+            //showError(getContext().getString(R.string.error_no_history));
+            mLoadingIndicator.setVisibility(View.GONE);
+            mLineChart.setNoDataText(getContext().getString(R.string.error_no_history));
+            mLoadingIndicator.setVisibility(View.GONE);
+            return;
         }
+        mHistoryList = cursorDataToHistoryList(data);
+
 
         List<Entry> entries = new ArrayList<Entry>();
         if (null == mHistoryList || mHistoryList.size() <= 0) {
@@ -199,6 +204,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mLineChart.invalidate();
         mLoadingIndicator.setVisibility(View.INVISIBLE);
 
+
         Log.d(LOG_TAG, "Fin");
     }
 
@@ -255,7 +261,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (!PrefUtils.getTimeInterval(getActivity()).equalsIgnoreCase(mTimeIntervalPreference)) {
             mLoadingIndicator.setVisibility(View.VISIBLE);
             Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-            addHistoryIntent.putExtra(Intent.EXTRA_TEXT,mSymbol);
+            addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
             getActivity().startService(addHistoryIntent);
             mTimeIntervalPreference = PrefUtils.getTimeInterval(getActivity());
 

@@ -28,6 +28,10 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_add">Add</string>
 
+    <!--Error String -->
+
+    <string name="error_no_history"> No history available </string>
+
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
 
@@ -61,6 +65,7 @@
 
     <!--Content description strings -->
     <string name="add_new_stock">Add new stock</string>
+
 
 
 
