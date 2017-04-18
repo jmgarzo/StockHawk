@@ -23,6 +23,9 @@ public final class Contract {
 
     static final String PATH_HISTORY = "history";
     static final String PATH_HISTORY_WITH_ID = PATH_HISTORY + "/#";
+
+    static final String PATH_STOCK_QUOTE = "stock_quote";
+
     private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
     private Contract() {
@@ -33,11 +36,11 @@ public final class Contract {
 
         public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_STOCK).build();
 
-        static final String TABLE_NAME = "stock";
+        public static final String TABLE_NAME = "stock";
 
         public static final String COLUMN_CURRENCY = "currency";
         public static final String COLUMN_NAME ="name";
-        public static final String COLUMN_STOCKEXCHANGE = "stockExchange";
+        public static final String COLUMN_STOCKEXCHANGE = "stockexchange";
         public static final String COLUMN_SYMBOL = "symbol";
         public static final int POSITION_ID = 0;
         public static final int POSITION_NAME = 1;
@@ -58,7 +61,7 @@ public final class Contract {
 
         public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_QUOTE).build();
 
-        static final String TABLE_NAME = "quotes";
+        public static final String TABLE_NAME = "quotes";
 
         public static final String COLUMN_STOCK_KEY = "id_stock";
         public static final String COLUMN_SYMBOL = "symbol";
@@ -141,6 +144,52 @@ public final class Contract {
                 COLUMN_REGISTRY_TYPE
         );
 
+    }
+
+    public static final class StockQuoteEntry implements BaseColumns{
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_STOCK_QUOTE).build();
+
+        public static final String TABLE_NAME = Contract.StockEntry.TABLE_NAME +
+                " INNER JOIN " + Contract.QuoteEntry.TABLE_NAME +
+                " ON " +
+                Contract.StockEntry.TABLE_NAME + "."+ Contract.StockEntry._ID  +
+                " = "+ Contract.QuoteEntry.TABLE_NAME + "."+ Contract.QuoteEntry.COLUMN_STOCK_KEY;
+
+        public static final String COLUMN_STOCK_ID = StockEntry.TABLE_NAME + "." +
+                StockEntry._ID;
+        public static final String COLUMN_QUOTE_ID = QuoteEntry.TABLE_NAME + "." +
+                QuoteEntry._ID;
+        public static final String COLUMN_CURRENCY = StockEntry.COLUMN_CURRENCY;
+        public static final String COLUMN_NAME =StockEntry.COLUMN_NAME;
+        public static final String COLUMN_STOCKEXCHANGE = StockEntry.COLUMN_STOCKEXCHANGE;
+        public static final String COLUMN_SYMBOL = QuoteEntry.TABLE_NAME + "." +
+                QuoteEntry.COLUMN_SYMBOL;
+        public static final String COLUMN_PRICE = QuoteEntry.COLUMN_PRICE;
+        public static final String COLUMN_ABSOLUTE_CHANGE = QuoteEntry.COLUMN_ABSOLUTE_CHANGE;
+        public static final String COLUMN_PERCENTAGE_CHANGE = QuoteEntry.COLUMN_PERCENTAGE_CHANGE;
+        public static final int POSITION_STOCK_ID = 0;
+        public static final int POSITION_QUOTE_ID = 1;
+        public static final int POSITION_CURRENCY = 2;
+        public static final int POSITION_NAME = 3;
+        public static final int POSITION_STOCKEXCHANGE  = 4;
+        public static final int POSITION_SYMBOL = 5;
+        public static final int POSITION_PRICE = 6;
+        public static final int POSITION_ABSOLUTE_CHANGE = 7;
+        public static final int POSITION_PERCENTAGE_CHANGE = 8;
+
+
+        public static final ImmutableList<String> STOCK_QUOTE_COLUMNS = ImmutableList.of(
+                COLUMN_STOCK_ID,
+                COLUMN_QUOTE_ID,
+                COLUMN_CURRENCY,
+                COLUMN_NAME,
+                COLUMN_STOCKEXCHANGE,
+                COLUMN_SYMBOL,
+                COLUMN_PRICE,
+                COLUMN_ABSOLUTE_CHANGE,
+                COLUMN_PERCENTAGE_CHANGE
+        );
     }
 
 }

@@ -48,19 +48,48 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     TextView error;
     private StockAdapter adapter;
 
+//    public static final String[] VIEW_STOCk_QUOTE_COLUNMS = {
+//
+//            Contract.StockEntry.TABLE_NAME + "." + Contract.StockEntry._ID,
+//            Contract.QuoteEntry.TABLE_NAME + "." + Contract.QuoteEntry._ID,
+//            Contract.StockEntry.COLUMN_CURRENCY,
+//            Contract.StockEntry.COLUMN_NAME,
+//            Contract.StockEntry.COLUMN_STOCKEXCHANGE,
+//            Contract.StockEntry.TABLE_NAME + "." + Contract.StockEntry.COLUMN_SYMBOL,
+//            Contract.QuoteEntry.TABLE_NAME + "." + Contract.QuoteEntry.COLUMN_SYMBOL,
+//            Contract.QuoteEntry.COLUMN_PRICE,
+//            Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE,
+//            Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE
+//
+//    };
+//    public static final int COL_STOCK_ID = 0;
+//    public static final int COL_QUOTE_ID = 1;
+//    public static final int COL_CURRENCY = 2;
+//    public static final int COL_NAME = 3;
+//    public static final int COL_STOCKEXCHANGE = 4;
+//    public static final int COL_STOCK_SYMBOL = 5;
+//    public static final int COL_QUOTE_SYMBOL = 6;
+//    public static final int COL_PRICE = 7;
+//    public static final int COL_ABSOLUTE_CHANGE = 8;
+//    public static final int COL_PERCENTAGE_CHANGE = 9;
+
+
+
+
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
-        Intent intent = new Intent(this,Detail.class);
-        intent.putExtra(Intent.EXTRA_TEXT,symbol);
+        Intent intent = new Intent(this, Detail.class);
+        intent.putExtra(Intent.EXTRA_TEXT, symbol);
         startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.setProperty("yahoofinance.baseurl.histquotes", "https://ichart.yahoo.com/table.csv");
 
-        if (savedInstanceState == null){
+        if (savedInstanceState == null) {
             QuoteSyncJob.initialize(this);
 
         }
@@ -145,10 +174,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this,
-                Contract.QuoteEntry.CONTENT_URI,
-                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
-                null, null, Contract.QuoteEntry.COLUMN_SYMBOL);
+//        return new CursorLoader(this,
+//                Contract.QuoteEntry.CONTENT_URI,
+//                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
+//                null, null, Contract.QuoteEntry.COLUMN_SYMBOL);
+//        return new CursorLoader(this,
+//                Contract.QuoteEntry.CONTENT_URI,
+//                VIEW_STOCk_QUOTE_COLUNMS,
+//                null, null, null);
+        return  new CursorLoader(this,
+                Contract.StockQuoteEntry.CONTENT_URI,
+                Contract.StockQuoteEntry.STOCK_QUOTE_COLUMNS.toArray(new String[]{}),
+                null,
+                null,
+                Contract.StockQuoteEntry.COLUMN_SYMBOL);
     }
 
     @Override

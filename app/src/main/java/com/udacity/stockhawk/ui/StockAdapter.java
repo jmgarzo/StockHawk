@@ -51,7 +51,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
     String getSymbolAtPosition(int position) {
 
         cursor.moveToPosition(position);
-        return cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL);
+        return cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
     }
 
     @Override
@@ -67,17 +67,18 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
         cursor.moveToPosition(position);
 
-        if(cursor.getDouble(Contract.QuoteEntry.POSITION_PRICE) ==- 1 && cursor.getDouble(Contract.QuoteEntry.POSITION_PERCENTAGE_CHANGE) == -1){
-            holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
+        if(cursor.getDouble(Contract.StockQuoteEntry.POSITION_PRICE) ==- 1 && cursor.getDouble(Contract.StockQuoteEntry.POSITION_PERCENTAGE_CHANGE) == -1){
+            holder.symbol.setText(cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL));
             holder.price.setText("");
             holder.change.setText("");
         }else {
-            holder.symbol.setText(cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL));
-            holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.QuoteEntry.POSITION_PRICE)));
+            holder.name.setText(cursor.getString(Contract.StockQuoteEntry.POSITION_NAME));
+            holder.symbol.setText(cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL));
+            holder.price.setText(dollarFormat.format(cursor.getFloat(Contract.StockQuoteEntry.POSITION_PRICE)));
 
 
-            float rawAbsoluteChange = cursor.getFloat(Contract.QuoteEntry.POSITION_ABSOLUTE_CHANGE);
-            float percentageChange = cursor.getFloat(Contract.QuoteEntry.POSITION_PERCENTAGE_CHANGE);
+            float rawAbsoluteChange = cursor.getFloat(Contract.StockQuoteEntry.POSITION_ABSOLUTE_CHANGE);
+            float percentageChange = cursor.getFloat(Contract.StockQuoteEntry.POSITION_PERCENTAGE_CHANGE);
 
             if (rawAbsoluteChange > 0) {
                 holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
@@ -115,6 +116,10 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
     class StockViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+
+        @BindView(R.id.name)
+        TextView name;
+
         @BindView(R.id.symbol)
         TextView symbol;
 
@@ -134,7 +139,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             cursor.moveToPosition(adapterPosition);
-            String symbol= cursor.getString(Contract.QuoteEntry.POSITION_SYMBOL);
+            String symbol= cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
             clickHandler.onClick(symbol);
 
         }

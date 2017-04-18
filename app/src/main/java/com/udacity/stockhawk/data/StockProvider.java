@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import yahoofinance.Stock;
+
 
 public class StockProvider extends ContentProvider {
 
@@ -25,6 +27,8 @@ public class StockProvider extends ContentProvider {
     private static final int STOCK = 300;
     private static final int STOCK_FOR_SYMBOL = 301;
     private static final int STOCK_WITH_ID = 302;
+
+    private static final int STOCK_QUOTE = 400;
 
 
     private static final UriMatcher uriMatcher = buildUriMatcher();
@@ -43,8 +47,12 @@ public class StockProvider extends ContentProvider {
 
         matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY,HISTORY);
         matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY_WITH_ID,HISTORY);
+
+        matcher.addURI(Contract.AUTHORITY,Contract.PATH_STOCK_QUOTE,STOCK_QUOTE);
         return matcher;
     }
+
+
 
 
     @Override
@@ -97,7 +105,6 @@ public class StockProvider extends ContentProvider {
                         sortOrder
                 );
                 break;
-
 
             case QUOTE:
                 returnCursor = db.query(
@@ -153,6 +160,18 @@ public class StockProvider extends ContentProvider {
                         projection,
                         Contract.HistoryEntry._ID + " = ?",
                         new String[]{uri.getPathSegments().get(1)},
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+
+            case STOCK_QUOTE:
+                returnCursor = db.query(
+                        Contract.StockQuoteEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
                         null,
                         null,
                         sortOrder
