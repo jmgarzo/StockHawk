@@ -98,6 +98,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+        mLoadingIndicator.setVisibility(View.VISIBLE);
 
         return root;
     }
@@ -129,13 +130,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         initMaxAndMinValues();
         configChart();
 
-        if (data == null || data.getCount() <= 0) {
-            //showError(getContext().getString(R.string.error_no_history));
-            mLoadingIndicator.setVisibility(View.GONE);
-            mLineChart.setNoDataText(getContext().getString(R.string.error_no_history));
-            mLoadingIndicator.setVisibility(View.GONE);
-            return;
-        }
+        //TODO: Controlar casos de error.
+//        if (data == null || data.getCount() <= 0) {
+//            //showError(getContext().getString(R.string.error_no_history));
+//            mLineChart.setNoDataText(getContext().getString(R.string.error_no_history));
+//            mLoadingIndicator.setVisibility(View.GONE);
+//            return;
+//        }
         mHistoryList = cursorDataToHistoryList(data);
 
 
