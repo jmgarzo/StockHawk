@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.format.DateUtils;
@@ -153,14 +154,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Label");
-        dataSet.setColor(R.color.chart_line_pink_accent);
+        dataSet.setColor(ContextCompat.getColor(getContext(),R.color.colorAccent));
+
         LineData lineData = new LineData(dataSet);
         mLineChart.setData(lineData);
+
         mLineChart.invalidate();
 
         // get the legend (only possible after setting data)
         Legend l = mLineChart.getLegend();
         l.setEnabled(false);
+
 
 
         XAxis xAxis = mLineChart.getXAxis();
@@ -170,7 +174,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         xAxis.setTextColor(Color.WHITE);
         xAxis.setDrawAxisLine(false);
         xAxis.setDrawGridLines(true);
-        xAxis.setTextColor(Color.rgb(255, 192, 56));
+        //xAxis.setTextColor(Color.WHITE);
         xAxis.setCenterAxisLabels(true);
         //xAxis.setGranularity(1f); // one hour
         xAxis.setAxisMinimum(mXMin - ((mXMax - mXMin) * 0.05f));
@@ -191,13 +195,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         YAxis leftAxis = mLineChart.getAxisLeft();
         leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
         //leftAxis.setTypeface(mTfLight);
-        leftAxis.setTextColor(ColorTemplate.getHoloBlue());
+        leftAxis.setTextColor(Color.WHITE);
         leftAxis.setDrawGridLines(true);
         leftAxis.setGranularityEnabled(true);
         leftAxis.setAxisMinimum(mYMin - ((mYMax - mYMin) * 0.05f));
         leftAxis.setAxisMaximum(mYMax + ((mYMax - mYMin) * 0.05f));
         leftAxis.setYOffset(-9f);
-        leftAxis.setTextColor(Color.rgb(255, 192, 56));
+        //leftAxis.setTextColor(Color.rgb(255, 192, 56));
 
         YAxis rightAxis = mLineChart.getAxisRight();
         rightAxis.setEnabled(false);
@@ -250,7 +254,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mLineChart.setHighlightPerDragEnabled(true);
 
         // set an alternative background color
-        mLineChart.setBackgroundColor(Color.WHITE);
+       // mLineChart.setBackgroundColor(getResources().getColor(R.color.chart_line_pink_accent));
         mLineChart.setViewPortOffsets(0f, 0f, 0f, 0f);
 
     }
