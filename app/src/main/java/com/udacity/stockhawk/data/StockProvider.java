@@ -5,13 +5,12 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import yahoofinance.Stock;
 
 
 public class StockProvider extends ContentProvider {
@@ -45,14 +44,12 @@ public class StockProvider extends ContentProvider {
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_STOCK_WITH_SYMBOL, STOCK_FOR_SYMBOL);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_STOCK_WITH_ID, STOCK_WITH_ID);
 
-        matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY,HISTORY);
-        matcher.addURI(Contract.AUTHORITY,Contract.PATH_HISTORY_WITH_ID,HISTORY);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_HISTORY, HISTORY);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_HISTORY_WITH_ID, HISTORY);
 
-        matcher.addURI(Contract.AUTHORITY,Contract.PATH_STOCK_QUOTE,STOCK_QUOTE);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_STOCK_QUOTE, STOCK_QUOTE);
         return matcher;
     }
-
-
 
 
     @Override
@@ -144,16 +141,16 @@ public class StockProvider extends ContentProvider {
                 break;
 
             case HISTORY:
-            returnCursor = db.query(
-                    Contract.HistoryEntry.TABLE_NAME,
-                    projection,
-                    selection,
-                    selectionArgs,
-                    null,
-                    null,
-                    sortOrder
-            );
-            break;
+                returnCursor = db.query(
+                        Contract.HistoryEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
             case HISTORY_WITH_ID:
                 returnCursor = db.query(
                         Contract.HistoryEntry.TABLE_NAME,
@@ -182,7 +179,7 @@ public class StockProvider extends ContentProvider {
         }
 
         Context context = getContext();
-        if (context != null){
+        if (context != null) {
             returnCursor.setNotificationUri(context.getContentResolver(), uri);
         }
 
@@ -247,8 +244,9 @@ public class StockProvider extends ContentProvider {
         }
 
         Context context = getContext();
-        if (context != null){
-            context.getContentResolver().notifyChange(uri, null);
+        if (context != null) {
+            notifyChange(uri,null);
+
         }
 
         return returnUri;
@@ -338,8 +336,8 @@ public class StockProvider extends ContentProvider {
 
         if (rowsDeleted != 0) {
             Context context = getContext();
-            if (context != null){
-                context.getContentResolver().notifyChange(uri, null);
+            if (context != null) {
+                notifyChange(uri,null);
             }
         }
 
@@ -379,7 +377,7 @@ public class StockProvider extends ContentProvider {
 
                 context = getContext();
                 if (context != null) {
-                    context.getContentResolver().notifyChange(uri, null);
+                    notifyChange(uri,null);
                 }
 
                 return returnCount;
@@ -402,7 +400,7 @@ public class StockProvider extends ContentProvider {
 
                 context = getContext();
                 if (context != null) {
-                    context.getContentResolver().notifyChange(uri, null);
+                    notifyChange(uri,null);
                 }
 
                 return returnCount;
@@ -426,13 +424,22 @@ public class StockProvider extends ContentProvider {
 
                 context = getContext();
                 if (context != null) {
-                    context.getContentResolver().notifyChange(uri, null);
+                    notifyChange(uri,null);
                 }
 
                 return returnCount;
             default:
                 return super.bulkInsert(uri, values);
         }
+
+
+    }
+
+    private void notifyChange(Uri uri, ContentObserver observer) {
+        if (uri.equals(Contract.QuoteEntry.CONTENT_URI) || uri.equals((Contract.StockEntry.CONTENT_URI))) {
+            getContext().getContentResolver().notifyChange(Contract.StockQuoteEntry.CONTENT_URI, null);
+        }
+        getContext().getContentResolver().notifyChange(uri, observer);
 
 
     }
