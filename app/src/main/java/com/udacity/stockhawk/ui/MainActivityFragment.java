@@ -48,7 +48,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @BindView(R.id.fab)
     FloatingActionButton mFab;
 
-    private StockAdapter adapter;
+    public StockAdapter adapter;
 
 
 
@@ -103,9 +103,15 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                swipeRefreshLayout.setRefreshing(true);
+
                 String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
                 PrefUtils.removeStock(getContext(), symbol);
                 getActivity().getContentResolver().delete(Contract.QuoteEntry.makeUriForStock(symbol), null, null);
+
+                QuoteSyncJob.syncImmediately(getActivity());
+
+
             }
         }).attachToRecyclerView(stockRecyclerView);
 
@@ -156,7 +162,17 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
 
-     void addStock(String symbol) {
+
+
+    private boolean networkUp() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
+
+
+    void addStock(String symbol) {
         if (symbol != null && !symbol.isEmpty()) {
 
             if (networkUp()) {
@@ -170,14 +186,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             QuoteSyncJob.syncImmediately(getActivity());
         }
     }
-
-    private boolean networkUp() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
-
 
 
     @Override

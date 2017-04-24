@@ -1,6 +1,7 @@
 package com.udacity.stockhawk.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -67,11 +68,11 @@ public class AddStockDialog extends DialogFragment {
     }
 
     private void addStock() {
-//        Activity parent = getParentFragment().getActivity();
-//        if (parent instanceof MainActivity ) {
-//            getActivity().getFragmentManager()..addStock(stock.getText().toString());
-//        }
-//        dismissAllowingStateLoss();
+        Activity parent = getActivity();
+        if (parent instanceof MainActivity) {
+            ((MainActivity) parent).addStock(stock.getText().toString());
+        }
+        dismissAllowingStateLoss();
     }
 
 
