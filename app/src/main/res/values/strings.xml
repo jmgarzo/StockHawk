@@ -66,18 +66,8 @@
     <!--Content description strings -->
     <string name="add_new_stock">Add new stock</string>
 
-
-
-
-
-
-
-
-
-
-
-
-
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>
