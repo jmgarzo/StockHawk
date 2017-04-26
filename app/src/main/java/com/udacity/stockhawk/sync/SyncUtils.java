@@ -85,16 +85,17 @@ public class SyncUtils {
 
     public static int cleanDB(Context context) {
 
-        int deletedStock = context.getContentResolver().delete(Contract.StockEntry.CONTENT_URI, null, null);
-        Log.d(LOG_TAG, deletedStock + " Stocks Deleted. ");
-
-        int deletedQuote = context.getContentResolver().delete(Contract.QuoteEntry.CONTENT_URI, null, null);
-        Log.d(LOG_TAG, deletedQuote + " Quotes Deleted. ");
+//        int deletedStock = context.getContentResolver().delete(Contract.StockEntry.CONTENT_URI, null, null);
+//        Log.d(LOG_TAG, deletedStock + " Stocks Deleted. ");
+//
+//        int deletedQuote = context.getContentResolver().delete(Contract.QuoteEntry.CONTENT_URI, null, null);
+//        Log.d(LOG_TAG, deletedQuote + " Quotes Deleted. ");
 
         int deletedHistory = context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI, null, null);
         Log.d(LOG_TAG, deletedHistory + " Histories Deleted. ");
 
-        return deletedStock + deletedQuote + deletedHistory;
+//        return deletedStock + deletedQuote + deletedHistory;
+        return deletedHistory;
     }
 
 
