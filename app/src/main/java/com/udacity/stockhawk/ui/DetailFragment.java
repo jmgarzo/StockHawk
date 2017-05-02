@@ -2,12 +2,10 @@ package com.udacity.stockhawk.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
@@ -29,14 +27,12 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.objects.History;
 import com.udacity.stockhawk.sync.HistoryQuotesIntentService;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,8 +42,6 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.udacity.stockhawk.data.PrefUtils.getTimeInterval;
-
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -56,7 +50,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private String mSymbol;
     private ArrayList<History> mHistoryList;
-    private static final int STOCK_LOADER = 0;
+    private static final int STOCK_LOADER = 11;
 
 //    public static final String ID_QUOTE_TAG = "quote_tag";
 
@@ -73,6 +67,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @BindView(R.id.pb_loading_indicator)
     ProgressBar mLoadingIndicator;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState==null){
+            getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+
+        }
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,14 +95,33 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Intent intent = getActivity().getIntent();
         if (null != intent) {
             mSymbol = intent.getStringExtra(Intent.EXTRA_TEXT);
-            Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-            addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
-            getActivity().startService(addHistoryIntent);
+            if (mSymbol != null) {
+                Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
+                addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
+                getActivity().startService(addHistoryIntent);
+                //getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+                getLoaderManager().restartLoader(STOCK_LOADER, null, this);
+
+                mLoadingIndicator.setVisibility(View.VISIBLE);
+            }
+
+            Bundle arguments = getArguments();
+            if (arguments != null) {
+                mSymbol = arguments.getString(Intent.EXTRA_TEXT);
+                Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
+                addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
+                getActivity().startService(addHistoryIntent);
+                //getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+                getLoaderManager().restartLoader(STOCK_LOADER, null, this);
+
+
+                mLoadingIndicator.setVisibility(View.VISIBLE);
+            }
 
         }
 
-        getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
-        mLoadingIndicator.setVisibility(View.VISIBLE);
+
+
 
         return root;
     }
@@ -108,17 +130,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        mLoadingIndicator.setVisibility(View.VISIBLE);
+       // mLoadingIndicator.setVisibility(View.VISIBLE);
 
         switch (id) {
             case STOCK_LOADER: {
-                return new CursorLoader(getActivity(),
-                        Contract.HistoryEntry.CONTENT_URI,
-                        Contract.HistoryEntry.HISTORY_COLUMNS.toArray(new String[]{}),
-                        Contract.HistoryEntry.COLUMN_SYMBOL + " = ? ",
-                        new String[]{mSymbol},
-                        Contract.HistoryEntry.COLUMN_DATE
-                );
+                if (null != mSymbol && !mSymbol.equals("")) {
+                    return new CursorLoader(getActivity(),
+                            Contract.HistoryEntry.CONTENT_URI,
+                            Contract.HistoryEntry.HISTORY_COLUMNS.toArray(new String[]{}),
+                            Contract.HistoryEntry.COLUMN_SYMBOL + " = ? ",
+                            new String[]{mSymbol},
+                            Contract.HistoryEntry.COLUMN_DATE
+                    );
+                }
             }
         }
         return null;
@@ -126,90 +150,91 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (loader.getId() == STOCK_LOADER) {
 
+            initMaxAndMinValues();
+            configChart();
 
-        initMaxAndMinValues();
-        configChart();
-
-        //TODO: Controlar casos de error.
+            //TODO: Controlar casos de error.
 //        if (data == null || data.getCount() <= 0) {
 //            //showError(getContext().getString(R.string.error_no_history));
 //            mLineChart.setNoDataText(getContext().getString(R.string.error_no_history));
 //            mLoadingIndicator.setVisibility(View.GONE);
 //            return;
 //        }
-        mHistoryList = cursorDataToHistoryList(data);
+            mHistoryList = cursorDataToHistoryList(data);
 
 
-        List<Entry> entries = new ArrayList<Entry>();
-        if (null == mHistoryList || mHistoryList.size() <= 0) {
-            return;
-        }
-        for (History his : mHistoryList) {
-
-            setMaxAndMinValues(his);
-            // turn your data into Entry objects
-            entries.add(new Entry((float) his.getDate(), (float) his.getClose()));
-            Log.d(LOG_TAG, getReadableDateString(getActivity(), his.getDate()));
-        }
-
-        LineDataSet dataSet = new LineDataSet(entries, "Label");
-        dataSet.setColor(ContextCompat.getColor(getContext(),R.color.colorAccent));
-
-        LineData lineData = new LineData(dataSet);
-        mLineChart.setData(lineData);
-
-        mLineChart.invalidate();
-
-        // get the legend (only possible after setting data)
-        Legend l = mLineChart.getLegend();
-        l.setEnabled(false);
-
-
-
-        XAxis xAxis = mLineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.TOP_INSIDE);
-        // xAxis.setTypeface(mTfLight);
-        xAxis.setTextSize(10f);
-        xAxis.setTextColor(Color.WHITE);
-        xAxis.setDrawAxisLine(false);
-        xAxis.setDrawGridLines(true);
-        //xAxis.setTextColor(Color.WHITE);
-        xAxis.setCenterAxisLabels(true);
-        //xAxis.setGranularity(1f); // one hour
-        xAxis.setAxisMinimum(mXMin - ((mXMax - mXMin) * 0.05f));
-        xAxis.setAxisMaximum(mXMax + ((mXMax - mXMin) * 0.05f));
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
-
-            private SimpleDateFormat mFormat = new SimpleDateFormat("dd MMM");
-
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-
-                long millis = TimeUnit.HOURS.toMillis((long) value);
-                return mFormat.format(new Date(millis));
+            List<Entry> entries = new ArrayList<Entry>();
+            if (null == mHistoryList || mHistoryList.size() <= 0) {
+                return;
             }
-        });
+            for (History his : mHistoryList) {
+
+                setMaxAndMinValues(his);
+                // turn your data into Entry objects
+                entries.add(new Entry((float) his.getDate(), (float) his.getClose()));
+                Log.d(LOG_TAG, getReadableDateString(getActivity(), his.getDate()));
+            }
+
+            LineDataSet dataSet = new LineDataSet(entries, "Label");
+            dataSet.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+
+            LineData lineData = new LineData(dataSet);
+            mLineChart.setData(lineData);
+
+            mLineChart.invalidate();
+
+            // get the legend (only possible after setting data)
+            Legend l = mLineChart.getLegend();
+            l.setEnabled(false);
 
 
-        YAxis leftAxis = mLineChart.getAxisLeft();
-        leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
-        //leftAxis.setTypeface(mTfLight);
-        leftAxis.setTextColor(Color.WHITE);
-        leftAxis.setDrawGridLines(true);
-        leftAxis.setGranularityEnabled(true);
-        leftAxis.setAxisMinimum(mYMin - ((mYMax - mYMin) * 0.05f));
-        leftAxis.setAxisMaximum(mYMax + ((mYMax - mYMin) * 0.05f));
-        leftAxis.setYOffset(-9f);
-        //leftAxis.setTextColor(Color.rgb(255, 192, 56));
+            XAxis xAxis = mLineChart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.TOP_INSIDE);
+            // xAxis.setTypeface(mTfLight);
+            xAxis.setTextSize(10f);
+            xAxis.setTextColor(Color.WHITE);
+            xAxis.setDrawAxisLine(false);
+            xAxis.setDrawGridLines(true);
+            //xAxis.setTextColor(Color.WHITE);
+            xAxis.setCenterAxisLabels(true);
+            //xAxis.setGranularity(1f); // one hour
+            xAxis.setAxisMinimum(mXMin - ((mXMax - mXMin) * 0.05f));
+            xAxis.setAxisMaximum(mXMax + ((mXMax - mXMin) * 0.05f));
+            xAxis.setValueFormatter(new IAxisValueFormatter() {
 
-        YAxis rightAxis = mLineChart.getAxisRight();
-        rightAxis.setEnabled(false);
+                private SimpleDateFormat mFormat = new SimpleDateFormat("dd MMM");
 
-        mLineChart.invalidate();
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+
+                    long millis = TimeUnit.HOURS.toMillis((long) value);
+                    return mFormat.format(new Date(millis));
+                }
+            });
 
 
+            YAxis leftAxis = mLineChart.getAxisLeft();
+            leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+            //leftAxis.setTypeface(mTfLight);
+            leftAxis.setTextColor(Color.WHITE);
+            leftAxis.setDrawGridLines(true);
+            leftAxis.setGranularityEnabled(true);
+            leftAxis.setAxisMinimum(mYMin - ((mYMax - mYMin) * 0.05f));
+            leftAxis.setAxisMaximum(mYMax + ((mYMax - mYMin) * 0.05f));
+            leftAxis.setYOffset(-9f);
+            //leftAxis.setTextColor(Color.rgb(255, 192, 56));
+
+            YAxis rightAxis = mLineChart.getAxisRight();
+            rightAxis.setEnabled(false);
+
+            mLineChart.invalidate();
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            mLineChart.refreshDrawableState();
+
+
+        }
         Log.d(LOG_TAG, "Fin");
     }
 
@@ -223,7 +248,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
     }
 
     private ArrayList<History> cursorDataToHistoryList(Cursor cursor) {
@@ -254,7 +278,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mLineChart.setHighlightPerDragEnabled(true);
 
         // set an alternative background color
-       // mLineChart.setBackgroundColor(getResources().getColor(R.color.chart_line_pink_accent));
+        // mLineChart.setBackgroundColor(getResources().getColor(R.color.chart_line_pink_accent));
         mLineChart.setViewPortOffsets(0f, 0f, 0f, 0f);
 
     }
@@ -263,6 +287,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onResume() {
 
         super.onResume();
+        getLoaderManager().restartLoader(STOCK_LOADER, null, this);
+
+
         if (!PrefUtils.getTimeInterval(getActivity()).equalsIgnoreCase(mTimeIntervalPreference)) {
             mLoadingIndicator.setVisibility(View.VISIBLE);
             Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);

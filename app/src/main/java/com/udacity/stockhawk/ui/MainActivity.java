@@ -1,5 +1,6 @@
 package com.udacity.stockhawk.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -12,46 +13,10 @@ import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity   {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback  {
 
-//    private static final int STOCK_LOADER = 0;
-//    @SuppressWarnings("WeakerAccess")
-//    @BindView(R.id.recycler_view)
-//    RecyclerView stockRecyclerView;
-//    @SuppressWarnings("WeakerAccess")
-//    @BindView(R.id.swipe_refresh)
-//    SwipeRefreshLayout swipeRefreshLayout;
-//    @SuppressWarnings("WeakerAccess")
-//    @BindView(R.id.error)
-//    TextView error;
-//    private StockAdapter adapter;
-
-//    public static final String[] VIEW_STOCk_QUOTE_COLUNMS = {
-//
-//            Contract.StockEntry.TABLE_NAME + "." + Contract.StockEntry._ID,
-//            Contract.QuoteEntry.TABLE_NAME + "." + Contract.QuoteEntry._ID,
-//            Contract.StockEntry.COLUMN_CURRENCY,
-//            Contract.StockEntry.COLUMN_NAME,
-//            Contract.StockEntry.COLUMN_STOCKEXCHANGE,
-//            Contract.StockEntry.TABLE_NAME + "." + Contract.StockEntry.COLUMN_SYMBOL,
-//            Contract.QuoteEntry.TABLE_NAME + "." + Contract.QuoteEntry.COLUMN_SYMBOL,
-//            Contract.QuoteEntry.COLUMN_PRICE,
-//            Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE,
-//            Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE
-//
-//    };
-//    public static final int COL_STOCK_ID = 0;
-//    public static final int COL_QUOTE_ID = 1;
-//    public static final int COL_CURRENCY = 2;
-//    public static final int COL_NAME = 3;
-//    public static final int COL_STOCKEXCHANGE = 4;
-//    public static final int COL_STOCK_SYMBOL = 5;
-//    public static final int COL_QUOTE_SYMBOL = 6;
-//    public static final int COL_PRICE = 7;
-//    public static final int COL_ABSOLUTE_CHANGE = 8;
-//    public static final int COL_PERCENTAGE_CHANGE = 9;
-
-
+    private boolean mTwoPane;
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
 
 
 
@@ -59,22 +24,42 @@ public class MainActivity extends AppCompatActivity   {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //System.setProperty("yahoofinance.baseurl.histquotes", "https://ichart.yahoo.com/table.csv");
+        setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
+
+        if (findViewById(R.id.stock_detail_container) != null) {
+
+            mTwoPane = true;
+
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.stock_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+            getSupportActionBar().setElevation(0f);
+            if (savedInstanceState == null) {
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.fragment_main, new MainActivityFragment())
+                        .commit();
+
+
+            }
+
             QuoteSyncJob.initialize(this);
-
         }
 
-        setContentView(R.layout.activity_main);
+
+
+
         ButterKnife.bind(this);
 
 
         //onRefresh();
 
         //QuoteSyncJob.initialize(this);
-
-
 
 
     }
@@ -127,4 +112,26 @@ public class MainActivity extends AppCompatActivity   {
 
     }
 
+
+    @Override
+    public void onItemSelected(String symbol) {
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putString(Intent.EXTRA_TEXT, symbol);
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.stock_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, Detail.class);
+            intent.putExtra(Intent.EXTRA_TEXT,symbol);
+            startActivity(intent);
+        }
+    }
 }

@@ -1,7 +1,6 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -35,6 +34,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         SwipeRefreshLayout.OnRefreshListener,
         StockAdapter.StockAdapterOnClickHandler {
 
+    public interface Callback {
+
+        public void onItemSelected(String symbol);
+    }
+
     private static final int STOCK_LOADER = 0;
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.recycler_view)
@@ -55,19 +59,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
-        Intent intent = new Intent(getActivity(), Detail.class);
-        intent.putExtra(Intent.EXTRA_TEXT, symbol);
-        startActivity(intent);
-    }
 
-
-
-
-    public interface Callback {
-        /**
-         * DetailFragmentCallback for when an item has been selected.
-         */
-        public void addStock(String stock);
+        ((Callback) getActivity()).onItemSelected(symbol);
+//        Intent intent = new Intent(getActivity(), Detail.class);
+//        intent.putExtra(Intent.EXTRA_TEXT, symbol);
+//        startActivity(intent);
     }
 
 
@@ -128,14 +124,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//        return new CursorLoader(this,
-//                Contract.QuoteEntry.CONTENT_URI,
-//                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
-//                null, null, Contract.QuoteEntry.COLUMN_SYMBOL);
-//        return new CursorLoader(this,
-//                Contract.QuoteEntry.CONTENT_URI,
-//                VIEW_STOCk_QUOTE_COLUNMS,
-//                null, null, null);
+
         return  new CursorLoader(getActivity(),
                 Contract.StockQuoteEntry.CONTENT_URI,
                 Contract.StockQuoteEntry.STOCK_QUOTE_COLUMNS.toArray(new String[]{}),
