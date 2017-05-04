@@ -39,29 +39,17 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         } else {
             mTwoPane = false;
             getSupportActionBar().setElevation(0f);
-            if (savedInstanceState == null) {
-
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.fragment_main, new MainActivityFragment())
-                        .commit();
-
-
-            }
-
-            QuoteSyncJob.initialize(this);
         }
+        QuoteSyncJob.initialize(this);
 
-
-
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_main, new MainActivityFragment())
+                .commit();
 
         ButterKnife.bind(this);
 
-
         //onRefresh();
-
         //QuoteSyncJob.initialize(this);
-
-
     }
 
 

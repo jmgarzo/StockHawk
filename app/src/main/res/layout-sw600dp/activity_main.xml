@@ -11,9 +11,8 @@
     This layout is a two-pane layout for the Items master/detail flow.
     -->
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragment_main"
-        android:name="com.udacity.stockhawk.ui.MainActivityFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2"
