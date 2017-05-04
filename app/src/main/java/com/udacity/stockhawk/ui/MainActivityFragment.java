@@ -36,7 +36,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     public interface Callback {
 
-        public void onItemSelected(String symbol);
+        void onItemSelected(String symbol);
     }
 
     private static final int STOCK_LOADER = 0;

@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.stock_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .add(R.id.stock_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
                         .commit();
             }
         } else {
