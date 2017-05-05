@@ -157,14 +157,14 @@ public class SyncUtils {
 //    }
 
     public static void addHistory(Context context, String symbol) {
+        ArrayList<MyQuote> quotesList;
 
-        ArrayList<MyQuote> quotesList = getQuoteDB(context, symbol);
+        if(symbol==null){
+            quotesList = getFirstQuote(context);
+        }else {
+            quotesList = getQuoteDB(context, symbol);
+        }
 
-////        Calendar from = Calendar.getInstance();
-////        Calendar to = Calendar.getInstance();
-//
-//        //from.add(Calendar.YEAR, -1); // from 5 years ago
-//        //from.add(Calendar.DAY_OF_MONTH, -5);
         if (null != quotesList && quotesList.size() > 0) {
 
             for (MyQuote quote : quotesList) {
@@ -199,8 +199,8 @@ public class SyncUtils {
                 }
                 if (null != cvArray && cvArray.length > 0) {
                     context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI,
-                            Contract.HistoryEntry.COLUMN_QUOTE_KEY + " = ?",
-                            new String[]{Integer.toString(quote.getId())});
+                            Contract.HistoryEntry.COLUMN_SYMBOL + " = ?",
+                            new String[]{quote.getSymbol()});
                     context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI, cvArray);
                 }
 
@@ -276,6 +276,7 @@ public class SyncUtils {
 
     public static ArrayList<MyQuote> getQuoteDB(Context context, String symbol) {
 
+
         Cursor cursor = context.getContentResolver().query(
                 Contract.QuoteEntry.CONTENT_URI,
                 Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
@@ -295,6 +296,24 @@ public class SyncUtils {
         return quoteList;
     }
 
+
+    public static ArrayList<MyQuote> getFirstQuote(Context context) {
+        Cursor cursor = context.getContentResolver().query(
+                Contract.QuoteEntry.CONTENT_URI,
+                Contract.QuoteEntry.QUOTE_COLUMNS.toArray(new String[]{}),
+                null,
+                null,
+                Contract.QuoteEntry.COLUMN_SYMBOL
+        );
+        ArrayList<MyQuote> quoteList = null;
+
+        if (null != cursor && cursor.moveToFirst()) {
+            quoteList = new ArrayList<>();
+                MyQuote quote = new MyQuote(cursor, 0);
+                quoteList.add(quote);
+        }
+        return quoteList;
+    }
     private static Stock loadStockByPreference(Context context, MyQuote quote) {
         Calendar from = Calendar.getInstance();
         Calendar to = Calendar.getInstance();

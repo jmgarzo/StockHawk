@@ -43,12 +43,7 @@ public class SettingsActivity extends PreferenceActivity
 
         if (preference instanceof ListPreference) {
 
-            if (((ListPreference) preference).getValue().toString().equals(newValue)) {
-                Log.d("probando", "prueba");
-            } else {
-                Log.d("probando", "prueba");
 
-            }
             // For list preferences, look up the correct display value in
             // the preference's 'entries' list (since they have separate labels/values).
             ListPreference listPreference = (ListPreference) preference;

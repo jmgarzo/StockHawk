@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     private boolean mTwoPane;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    private String firstSymbol;
 
 
     @Override
@@ -30,8 +31,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             mTwoPane = true;
 
             if (savedInstanceState == null) {
+                Bundle args = new Bundle();
+                args.putString(DetailFragment.SYMBOL_TAG,null);
+                args.putBoolean(DetailFragment.TWO_PANE_TAG,mTwoPane);
+                DetailFragment fragment = new DetailFragment();
+                fragment.setArguments(args);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.stock_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .replace(R.id.stock_detail_container, fragment, DETAILFRAGMENT_TAG)
                         .commit();
             }
         } else {
@@ -103,25 +109,24 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
 
+
+
     @Override
     public void onItemSelected(String symbol) {
+        Bundle args = new Bundle();
+        args.putString(DetailFragment.SYMBOL_TAG, symbol);
+        args.putBoolean(DetailFragment.TWO_PANE_TAG,mTwoPane);
         if (mTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-            Bundle args = new Bundle();
-            args.putString(Intent.EXTRA_TEXT, symbol);
-
             DetailFragment fragment = new DetailFragment();
             fragment.setArguments(args);
-
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.stock_detail_container, fragment, DETAILFRAGMENT_TAG)
                     .commit();
         } else {
             Intent intent = new Intent(this, Detail.class);
-            intent.putExtra(Intent.EXTRA_TEXT, symbol);
+            intent.putExtras(args);
             startActivity(intent);
         }
     }
+
 }

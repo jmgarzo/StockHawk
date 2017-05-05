@@ -51,6 +51,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private String mSymbol;
     private ArrayList<History> mHistoryList;
     private static final int STOCK_LOADER = 11;
+    public static final String SYMBOL_TAG = "symbol_tag";
+    public static final String TWO_PANE_TAG ="two_pane_tag";
 
 //    public static final String ID_QUOTE_TAG = "quote_tag";
 
@@ -61,21 +63,21 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private String mTimeIntervalPreference;
 
+    private boolean twoPane;
+
 
     @BindView(R.id.detail_chart)
     LineChart mLineChart;
     @BindView(R.id.pb_loading_indicator)
     ProgressBar mLoadingIndicator;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if(savedInstanceState==null){
-            getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
-
-        }
-
-    }
+//    @Override
+//    public void onCreate(@Nullable Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+//
+//
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,35 +94,30 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         // no description text
 
-        Intent intent = getActivity().getIntent();
-        if (null != intent) {
-            mSymbol = intent.getStringExtra(Intent.EXTRA_TEXT);
-            if (mSymbol != null) {
-                Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-                addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
-                getActivity().startService(addHistoryIntent);
-                //getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
-                getLoaderManager().restartLoader(STOCK_LOADER, null, this);
+        Bundle arguments = getArguments();
 
-                mLoadingIndicator.setVisibility(View.VISIBLE);
+        if(arguments != null){
+            mSymbol = arguments.getString(SYMBOL_TAG);
+            twoPane = arguments.getBoolean(TWO_PANE_TAG);
+
+            if(twoPane && mSymbol != null){
+                getActivity().getSupportLoaderManager().restartLoader(STOCK_LOADER, null, this);
+            }else {
+                getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
             }
 
-            Bundle arguments = getArguments();
-            if (arguments != null) {
-                mSymbol = arguments.getString(Intent.EXTRA_TEXT);
-                Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
-                addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
-                getActivity().startService(addHistoryIntent);
-                //getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
-                getLoaderManager().restartLoader(STOCK_LOADER, null, this);
 
-
-                mLoadingIndicator.setVisibility(View.VISIBLE);
-            }
-
+        }else{
+            mSymbol=getActivity().getIntent().getStringExtra(SYMBOL_TAG);
+            twoPane= getActivity().getIntent().getBooleanExtra(TWO_PANE_TAG,false);
+            getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+            //getLoaderManager().restartLoader(STOCK_LOADER, null, this);
         }
 
-
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
+        addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
+        getActivity().startService(addHistoryIntent);
 
 
         return root;
@@ -130,7 +127,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-       // mLoadingIndicator.setVisibility(View.VISIBLE);
+         mLoadingIndicator.setVisibility(View.VISIBLE);
 
         switch (id) {
             case STOCK_LOADER: {
@@ -142,6 +139,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             new String[]{mSymbol},
                             Contract.HistoryEntry.COLUMN_DATE
                     );
+                }else {
+                    //If mSymbol is null is twopane and is the first time we load the Fragment.
+                    //In history's data base is load the first quote
+                    return new CursorLoader(getActivity(),
+                            Contract.HistoryEntry.CONTENT_URI,
+                            Contract.HistoryEntry.HISTORY_COLUMNS.toArray(new String[]{}),
+                            null,
+                            null,
+                            Contract.HistoryEntry.COLUMN_DATE);
                 }
             }
         }
@@ -283,19 +289,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    //Todo:
     @Override
     public void onResume() {
 
         super.onResume();
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+
         getLoaderManager().restartLoader(STOCK_LOADER, null, this);
 
 
         if (!PrefUtils.getTimeInterval(getActivity()).equalsIgnoreCase(mTimeIntervalPreference)) {
-            mLoadingIndicator.setVisibility(View.VISIBLE);
             Intent addHistoryIntent = new Intent(getActivity(), HistoryQuotesIntentService.class);
             addHistoryIntent.putExtra(Intent.EXTRA_TEXT, mSymbol);
             getActivity().startService(addHistoryIntent);
             mTimeIntervalPreference = PrefUtils.getTimeInterval(getActivity());
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+
 
         }
     }

@@ -59,11 +59,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
-
         ((Callback) getActivity()).onItemSelected(symbol);
-//        Intent intent = new Intent(getActivity(), Detail.class);
-//        intent.putExtra(Intent.EXTRA_TEXT, symbol);
-//        startActivity(intent);
     }
 
 
@@ -76,7 +72,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         final View rootView =  inflater.inflate(R.layout.fragment_main_activity, container, false);
 
         ButterKnife.bind(this,rootView);
@@ -106,7 +101,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 getActivity().getContentResolver().delete(Contract.QuoteEntry.makeUriForStock(symbol), null, null);
 
                 QuoteSyncJob.syncImmediately(getActivity());
-
 
             }
         }).attachToRecyclerView(stockRecyclerView);
@@ -140,6 +134,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         if (data.getCount() != 0) {
             error.setVisibility(View.GONE);
         }
+
         adapter.setCursor(data);
     }
 
