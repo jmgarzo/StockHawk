@@ -13,12 +13,10 @@ import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback  {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback {
 
     private boolean mTwoPane;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
-
-
 
 
     @Override
@@ -33,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.stock_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .replace(R.id.stock_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
                         .commit();
             }
         } else {
@@ -43,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         QuoteSyncJob.initialize(this);
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_main, new MainActivityFragment())
+                .replace(R.id.fragment_main, new MainActivityFragment())
                 .commit();
 
         ButterKnife.bind(this);
@@ -53,14 +51,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
 
-
-
-
     public void button(@SuppressWarnings("UnusedParameters") View view) {
         new AddStockDialog().show(getFragmentManager(), "StockDialogFragment");
     }
-
-
 
 
     private void setDisplayModeMenuItemIcon(MenuItem item) {
@@ -84,17 +77,26 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_change_units) {
-            PrefUtils.toggleDisplayMode(this);
-            setDisplayModeMenuItemIcon(item);
-            MainActivityFragment mainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_main);
-            mainActivityFragment.adapter.notifyDataSetChanged();
-            return true;
+        switch (id) {
+
+            case (R.id.action_change_units):
+                PrefUtils.toggleDisplayMode(this);
+                setDisplayModeMenuItemIcon(item);
+                MainActivityFragment mainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_main);
+                mainActivityFragment.adapter.notifyDataSetChanged();
+                return true;
+
+            case (R.id.action_settings): {
+                Intent intent = new Intent(this,SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+
         }
         return super.onOptionsItemSelected(item);
     }
 
-    void addStock(String stock){
+    void addStock(String stock) {
         MainActivityFragment mainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_main);
         mainActivityFragment.addStock(stock);
 
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
                     .commit();
         } else {
             Intent intent = new Intent(this, Detail.class);
-            intent.putExtra(Intent.EXTRA_TEXT,symbol);
+            intent.putExtra(Intent.EXTRA_TEXT, symbol);
             startActivity(intent);
         }
     }
