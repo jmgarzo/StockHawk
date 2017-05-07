@@ -49,8 +49,7 @@ public class SyncUtils {
 
             ContentValues cvQuote = new ContentValues();
             cvQuote.put(Contract.QuoteEntry.COLUMN_STOCK_KEY, quoteId);
-            cvQuote.put(Contract.QuoteEntry.COLUMN_SYMBOL, quote.getSymbol() + " " +
-                    context.getString(R.string.non_existent_value));
+            cvQuote.put(Contract.QuoteEntry.COLUMN_SYMBOL, quote.getSymbol());
             cvQuote.put(Contract.QuoteEntry.COLUMN_PRICE, -1);
             cvQuote.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, -1);
             cvQuote.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, -1);

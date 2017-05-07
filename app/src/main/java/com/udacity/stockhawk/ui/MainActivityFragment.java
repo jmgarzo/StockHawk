@@ -1,6 +1,7 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.sync.DeleteQuoteIntentService;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import butterknife.BindView;
@@ -97,8 +99,13 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 swipeRefreshLayout.setRefreshing(true);
 
                 String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
-                PrefUtils.removeStock(getContext(), symbol);
-                getActivity().getContentResolver().delete(Contract.QuoteEntry.makeUriForStock(symbol), null, null);
+
+                Intent deleteQuoteIntent= new Intent(getActivity(), DeleteQuoteIntentService.class);
+                deleteQuoteIntent.putExtra(Intent.EXTRA_TEXT, symbol);
+                getActivity().startService(deleteQuoteIntent);
+//                PrefUtils.removeStock(getContext(), symbol);
+//                getActivity().getContentResolver().delete(Contract.QuoteEntry.makeUriForStock(symbol), null, null);
+
 
                 QuoteSyncJob.syncImmediately(getActivity());
 

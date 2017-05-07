@@ -69,7 +69,6 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
         if(cursor.getDouble(Contract.StockQuoteEntry.POSITION_PRICE) ==- 1 && cursor.getDouble(Contract.StockQuoteEntry.POSITION_PERCENTAGE_CHANGE) == -1){
             holder.name.setText(context.getString(R.string.non_existent_value));
-
             holder.symbol.setText(cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL));
             holder.price.setText("");
             holder.change.setText("");

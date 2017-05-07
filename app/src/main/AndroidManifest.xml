@@ -29,6 +29,9 @@
         <service
             android:name=".sync.HistoryQuotesIntentService"
             android:exported="false" />
+        <service
+            android:name=".sync.DeleteQuoteIntentService"
+            android:exported="false" />
 
         <provider
             android:name=".data.StockProvider"

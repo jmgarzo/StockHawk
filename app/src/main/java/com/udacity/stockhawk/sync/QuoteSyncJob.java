@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.objects.History;
 
@@ -76,52 +77,7 @@ public final class QuoteSyncJob {
                     SyncUtils.addStockAndQuote(context, stock);
             }
 
-//                StockQuote quote = stock.getQuote();
-//
-//                float price = quote.getPrice().floatValue();
-//                float change = quote.getChange().floatValue();
-//                float percentChange = quote.getChangeInPercent().floatValue();
 
-            // WARNING! Don't request historical data for a stock that doesn't exist!
-            // The request will hang forever X_x
-//                List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
-//
-//                ArrayList<History> historyList = new ArrayList<>();
-//                for (HistoricalQuote it : history) {
-//                    History newHistory = new History(it);
-//                    historyList.add(newHistory);
-//                }
-
-//                ContentValues quoteCV = new ContentValues();
-//                quoteCV.put(Contract.QuoteEntry.COLUMN_SYMBOL, symbol);
-//                quoteCV.put(Contract.QuoteEntry.COLUMN_PRICE, price);
-//                quoteCV.put(Contract.QuoteEntry.COLUMN_PERCENTAGE_CHANGE, percentChange);
-//                quoteCV.put(Contract.QuoteEntry.COLUMN_ABSOLUTE_CHANGE, change);
-
-//                quoteCVs.add(quoteCV);
-//                Uri insertUri = context.getContentResolver().insert(Contract.QuoteEntry.CONTENT_URI, quoteCV);
-//
-//                if (insertUri != null) {
-//                    String idQuote = insertUri.getLastPathSegment();
-//                    ContentValues[] historyContentValues = new ContentValues[historyList.size()];
-//                    for (int i = 0; i < historyList.size(); i++) {
-//                        historyList.get(i).setQuoteId(Integer.valueOf(idQuote));
-//                        historyContentValues[i] = historyList.get(i).getContentValues();
-//                    }
-//                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI,
-//                            historyContentValues);
-//                }
-
-
-//            }
-
-//            context.getContentResolver()
-//                    .bulkInsert(
-//                            Contract.QuoteEntry.CONTENT_URI,
-//                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
-//
-//            Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
-//            context.sendBroadcast(dataUpdatedIntent);
 
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
@@ -190,18 +146,27 @@ public final class QuoteSyncJob {
 
             JobInfo.Builder builder = new JobInfo.Builder(ONE_OFF_ID, new ComponentName(context, QuoteJobService.class));
 
-
             builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                     .setBackoffCriteria(INITIAL_BACKOFF, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
-
 
             JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
             scheduler.schedule(builder.build());
-
-
         }
     }
 
+    public static  void deleteQuoteDBandPreferences(Context context,String symbol){
+        PrefUtils.removeStock(context, symbol);
+
+        context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI,
+                Contract.HistoryEntry.COLUMN_SYMBOL + "= ?",
+                new String[]{symbol});
+        context.getContentResolver().delete(Contract.QuoteEntry.CONTENT_URI,
+                Contract.QuoteEntry.COLUMN_SYMBOL + "= ?",
+                new String[]{symbol});
+        context.getContentResolver().delete(Contract.StockEntry.CONTENT_URI,
+                Contract.StockEntry.COLUMN_SYMBOL + "= ?",
+                new String[]{symbol});
+    }
 
 }
