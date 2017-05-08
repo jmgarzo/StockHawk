@@ -2,6 +2,6 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
 
 
-    <dimen name="widget_stock_default_width">40dp</dimen>
+    <dimen name="widget_stock_default_width">120dp</dimen>
     <dimen name="widget_stock_default_height">40dp</dimen>
 </resources>
