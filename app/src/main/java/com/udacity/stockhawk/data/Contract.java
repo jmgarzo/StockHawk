@@ -168,7 +168,8 @@ public final class Contract {
         public static final String COLUMN_PRICE = QuoteEntry.COLUMN_PRICE;
         public static final String COLUMN_ABSOLUTE_CHANGE = QuoteEntry.COLUMN_ABSOLUTE_CHANGE;
         public static final String COLUMN_PERCENTAGE_CHANGE = QuoteEntry.COLUMN_PERCENTAGE_CHANGE;
-        public static final int POSITION_STOCK_ID = 0;
+
+        public static final int POSITION_STOCK_ID =0;
         public static final int POSITION_QUOTE_ID = 1;
         public static final int POSITION_CURRENCY = 2;
         public static final int POSITION_NAME = 3;

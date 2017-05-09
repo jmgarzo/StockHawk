@@ -31,6 +31,7 @@
     <!--Error String -->
 
     <string name="error_no_history"> No history available </string>
+    <string name="error_no_data"> No data available </string>
 
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
@@ -71,6 +72,7 @@
 
     <!--widget-->
     <string name="title_widget_stock">StockHawk</string>
+    <string name="title_widget_detail">StockHawk Details</string>
 
 
 </resources>
