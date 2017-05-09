@@ -2,10 +2,12 @@ package com.udacity.stockhawk.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -33,8 +35,9 @@ import timber.log.Timber;
 
 
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
-        SwipeRefreshLayout.OnRefreshListener,
+        SwipeRefreshLayout.OnRefreshListener, SharedPreferences.OnSharedPreferenceChangeListener,
         StockAdapter.StockAdapterOnClickHandler {
+
 
     public interface Callback {
 
@@ -50,12 +53,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     SwipeRefreshLayout swipeRefreshLayout;
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.error)
-    TextView error;
+    TextView tvError;
     @BindView(R.id.fab)
     FloatingActionButton mFab;
 
-    public StockAdapter adapter;
-
+    public StockAdapter mAdapter;
 
 
     @Override
@@ -68,18 +70,31 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
+    @Override
+    public void onResume() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.registerOnSharedPreferenceChangeListener(this);
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View rootView =  inflater.inflate(R.layout.fragment_main_activity, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main_activity, container, false);
 
-        ButterKnife.bind(this,rootView);
+        ButterKnife.bind(this, rootView);
 
-        adapter = new StockAdapter(getActivity(), this);
-        stockRecyclerView.setAdapter(adapter);
+        mAdapter = new StockAdapter(getActivity(), this);
+        stockRecyclerView.setAdapter(mAdapter);
         stockRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -98,9 +113,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 swipeRefreshLayout.setRefreshing(true);
 
-                String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
+                String symbol = mAdapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
 
-                Intent deleteQuoteIntent= new Intent(getActivity(), DeleteQuoteIntentService.class);
+                Intent deleteQuoteIntent = new Intent(getActivity(), DeleteQuoteIntentService.class);
                 deleteQuoteIntent.putExtra(Intent.EXTRA_TEXT, symbol);
                 getActivity().startService(deleteQuoteIntent);
 //                PrefUtils.removeStock(getContext(), symbol);
@@ -119,6 +134,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             }
         });
 
+        updateEmptyView();
+
         return rootView;
     }
 
@@ -126,7 +143,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        return  new CursorLoader(getActivity(),
+        return new CursorLoader(getActivity(),
                 Contract.StockQuoteEntry.CONTENT_URI,
                 Contract.StockQuoteEntry.STOCK_QUOTE_COLUMNS.toArray(new String[]{}),
                 null,
@@ -139,20 +156,18 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         swipeRefreshLayout.setRefreshing(false);
 
         if (data.getCount() != 0) {
-            error.setVisibility(View.GONE);
+            tvError.setVisibility(View.GONE);
         }
 
-        adapter.setCursor(data);
+        mAdapter.setCursor(data);
     }
 
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         swipeRefreshLayout.setRefreshing(false);
-        adapter.setCursor(null);
+        mAdapter.setCursor(null);
     }
-
-
 
 
     private boolean networkUp() {
@@ -182,22 +197,28 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onRefresh() {
 
+
+        if(!networkUp()){
+            Toast.makeText(getActivity(), R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        updateEmptyView();
         QuoteSyncJob.syncImmediately(getActivity());
 
-        if (!networkUp() && adapter.getItemCount() == 0) {
-            swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_network));
-            error.setVisibility(View.VISIBLE);
-        } else if (!networkUp()) {
-            swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(getActivity(), R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-        } else if (PrefUtils.getStocks(getActivity()).size() == 0) {
-            swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_stocks));
-            error.setVisibility(View.VISIBLE);
-        } else {
-            error.setVisibility(View.GONE);
-        }
+//        if (!networkUp() && mAdapter.getItemCount() == 0) {
+//            swipeRefreshLayout.setRefreshing(false);
+//            error.setText(getString(R.string.error_no_network));
+//            error.setVisibility(View.VISIBLE);
+//        } else if (!networkUp()) {
+//            swipeRefreshLayout.setRefreshing(false);
+//            Toast.makeText(getActivity(), R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
+//        } else if (PrefUtils.getStocks(getActivity()).size() == 0) {
+//            swipeRefreshLayout.setRefreshing(false);
+//            error.setText(getString(R.string.error_no_stocks));
+//            error.setVisibility(View.VISIBLE);
+//        } else {
+//            error.setVisibility(View.GONE);
+//        }
     }
 
 
@@ -206,9 +227,45 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_connection_status_key))) {
+            updateEmptyView();
+        }
+    }
 
+    private void updateEmptyView() {
+        if (mAdapter.getItemCount() == 0) {
 
+            if (null != tvError) {
+                // if cursor is empty, why? do we have an invalid location
+                int message = R.string.error_no_stock_data;
+                @QuoteSyncJob.ConnectionStatus int status = PrefUtils.getConnectionStatus(getActivity());
+                switch (status) {
+                    case QuoteSyncJob.CONNECTION_STATUS_SERVER_DOWN:
+                        message = R.string.empty_stock_list_server_down;
+                        break;
+                    case QuoteSyncJob.CONNECTION_STATUS_SERVER_INVALID:
+                        message = R.string.empty_stock_list_server_error;
+                        break;
+                    case QuoteSyncJob.CONNECTION_STATUS_NO_STOCKS:
+                        message= R.string.empty_stock_list_no_selected;
+                        break;
+                    default:
+                        if (!PrefUtils.isNetworkAvailable(getActivity())) {
+                            message = R.string.empty_stock_list_no_network;
+                        }
+                }
+                swipeRefreshLayout.setRefreshing(false);
+                tvError.setVisibility(View.VISIBLE);
+                tvError.setText(message);
+            }else{
+                tvError.setVisibility(View.GONE);
+            }
 
+        }
+
+    }
 
 
 }

@@ -2,9 +2,13 @@ package com.udacity.stockhawk.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.sync.QuoteSyncJob;
+import com.udacity.stockhawk.ui.StockAdapter;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -150,5 +154,21 @@ public final class PrefUtils {
         return false;
     }
 
+
+    static public boolean isNetworkAvailable(Context c) {
+        ConnectivityManager cm =
+                (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+    @SuppressWarnings("ResourceType")
+    static public @QuoteSyncJob.ConnectionStatus
+    int getConnectionStatus(Context c){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        return sp.getInt(c.getString(R.string.pref_connection_status_key), QuoteSyncJob.CONNECTION_STATUS_UNKNOWN);
+    }
 
 }

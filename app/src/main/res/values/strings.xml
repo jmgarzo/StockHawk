@@ -32,6 +32,7 @@
 
     <string name="error_no_history"> No history available </string>
     <string name="error_no_data"> No data available </string>
+    <string name="error_no_stock_data"> No stock data available </string>
 
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
@@ -41,6 +42,8 @@
 
 
     <!--Settings -->
+
+
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
@@ -67,12 +70,18 @@
     <!--Content description strings -->
     <string name="add_new_stock">Add new stock</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!--widget-->
     <string name="title_widget_stock">StockHawk</string>
     <string name="title_widget_detail">StockHawk Details</string>
 
+    <string name="pref_connection_status_key" translatable="false">pref-status</string>
+
+    <!-- Empty Weather Database -->
+    <string name="empty_stock_list">No Stock information available</string>
+    <string name="empty_stock_list_no_network">No Stock information available. The network is not available to fetch stock data.</string>
+    <string name="empty_stock_list_server_down">No Stock information available. The server is not returning data.</string>
+    <string name="empty_stock_list_server_error">No Stock information available. The server is not returning valid data. Please check for an updated version of Stockhawk.</string>
+    <string name="empty_stock_list_no_selected">No Stock information available. No stock selected. You could add a stock.</string>
 
 </resources>

@@ -17,7 +17,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     private boolean mTwoPane;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
-    private String firstSymbol;
 
 
     @Override
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
                 PrefUtils.toggleDisplayMode(this);
                 setDisplayModeMenuItemIcon(item);
                 MainActivityFragment mainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_main);
-                mainActivityFragment.adapter.notifyDataSetChanged();
+                mainActivityFragment.mAdapter.notifyDataSetChanged();
                 return true;
 
             case (R.id.action_settings): {

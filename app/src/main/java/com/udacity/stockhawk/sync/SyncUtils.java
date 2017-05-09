@@ -3,6 +3,8 @@ package com.udacity.stockhawk.sync;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -346,4 +348,6 @@ public class SyncUtils {
         }
         return null;
     }
+
+
 }
