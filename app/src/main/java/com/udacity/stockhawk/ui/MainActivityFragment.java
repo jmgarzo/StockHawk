@@ -59,13 +59,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     public StockAdapter mAdapter;
 
-
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
         ((Callback) getActivity()).onItemSelected(symbol);
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -139,7 +137,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         return rootView;
     }
 
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -162,13 +159,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         mAdapter.setCursor(data);
     }
 
-
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         swipeRefreshLayout.setRefreshing(false);
         mAdapter.setCursor(null);
     }
-
 
     private boolean networkUp() {
         ConnectivityManager cm =
@@ -176,7 +171,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
-
 
     void addStock(String symbol) {
         if (symbol != null && !symbol.isEmpty()) {
@@ -193,32 +187,15 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         }
     }
 
-
     @Override
     public void onRefresh() {
 
-
-        if(!networkUp()){
+        if (!networkUp()) {
             Toast.makeText(getActivity(), R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
             swipeRefreshLayout.setRefreshing(false);
         }
         updateEmptyView();
         QuoteSyncJob.syncImmediately(getActivity());
-
-//        if (!networkUp() && mAdapter.getItemCount() == 0) {
-//            swipeRefreshLayout.setRefreshing(false);
-//            error.setText(getString(R.string.error_no_network));
-//            error.setVisibility(View.VISIBLE);
-//        } else if (!networkUp()) {
-//            swipeRefreshLayout.setRefreshing(false);
-//            Toast.makeText(getActivity(), R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-//        } else if (PrefUtils.getStocks(getActivity()).size() == 0) {
-//            swipeRefreshLayout.setRefreshing(false);
-//            error.setText(getString(R.string.error_no_stocks));
-//            error.setVisibility(View.VISIBLE);
-//        } else {
-//            error.setVisibility(View.GONE);
-//        }
     }
 
 
@@ -236,7 +213,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     private void updateEmptyView() {
         if (mAdapter.getItemCount() == 0) {
-
             if (null != tvError) {
                 // if cursor is empty, why? do we have an invalid location
                 int message = R.string.error_no_stock_data;
@@ -249,7 +225,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                         message = R.string.empty_stock_list_server_error;
                         break;
                     case QuoteSyncJob.CONNECTION_STATUS_NO_STOCKS:
-                        message= R.string.empty_stock_list_no_selected;
+                        message = R.string.empty_stock_list_no_selected;
                         break;
                     default:
                         if (!PrefUtils.isNetworkAvailable(getActivity())) {
@@ -259,13 +235,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 swipeRefreshLayout.setRefreshing(false);
                 tvError.setVisibility(View.VISIBLE);
                 tvError.setText(message);
-            }else{
+            } else {
                 tvError.setVisibility(View.GONE);
             }
-
         }
-
     }
-
-
 }
