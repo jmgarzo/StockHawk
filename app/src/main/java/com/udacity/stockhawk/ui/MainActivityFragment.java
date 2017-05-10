@@ -141,8 +141,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 Intent deleteQuoteIntent = new Intent(getActivity(), DeleteQuoteIntentService.class);
                 deleteQuoteIntent.putExtra(Intent.EXTRA_TEXT, symbol);
                 getActivity().startService(deleteQuoteIntent);
-//                PrefUtils.removeStock(getContext(), symbol);
-//                getActivity().getContentResolver().delete(Contract.QuoteEntry.makeUriForStock(symbol), null, null);
+
 
 
                 QuoteSyncJob.syncImmediately(getActivity());

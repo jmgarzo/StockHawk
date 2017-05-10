@@ -53,8 +53,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
         ButterKnife.bind(this);
 
-        //onRefresh();
-        //QuoteSyncJob.initialize(this);
     }
 
 

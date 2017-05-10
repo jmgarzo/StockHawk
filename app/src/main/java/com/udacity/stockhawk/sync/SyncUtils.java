@@ -3,8 +3,6 @@ package com.udacity.stockhawk.sync;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -86,76 +84,14 @@ public class SyncUtils {
 
     public static int cleanDB(Context context) {
 
-//        int deletedStock = context.getContentResolver().delete(Contract.StockEntry.CONTENT_URI, null, null);
-//        Log.d(LOG_TAG, deletedStock + " Stocks Deleted. ");
-//
-//        int deletedQuote = context.getContentResolver().delete(Contract.QuoteEntry.CONTENT_URI, null, null);
-//        Log.d(LOG_TAG, deletedQuote + " Quotes Deleted. ");
-
         int deletedHistory = context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI, null, null);
         Log.d(LOG_TAG, deletedHistory + " Histories Deleted. ");
 
-//        return deletedStock + deletedQuote + deletedHistory;
         return deletedHistory;
     }
 
 
-    //TODO: Si lo quiero dejar unir con el addHistory(Context, String symbol); Sino pues borrarlo
-//    public static void addHistory(Context context, int idQuote) {
-//
-//        ArrayList<MyQuote> quotesList = getQuoteDB(context, idQuote);
-//
-//
-////        Calendar from = Calendar.getInstance();
-////        Calendar to = Calendar.getInstance();
-//
-//        //from.add(Calendar.YEAR, -1); // from 5 years ago
-//        //from.add(Calendar.DAY_OF_MONTH, -5);
-//
-//
-//        if (null != quotesList && quotesList.size() > 0) {
-//
-//            for (MyQuote quote : quotesList) {
-//                ContentValues[] cvArray = null;
-//                try {
-//                    Stock stock = loadStockByPreference(context, quote);
-////                    Stock stock = YahooFinance.get(quote.getSymbol(), from, to, Interval.DAILY);
-//                    //Stock stock = YahooFinance.get(quote.getSymbol(),true);
-//                    if (null != stock) {
-//                        List<HistoricalQuote> historyList = stock.getHistory();
-//                        cvArray = new ContentValues[historyList.size()];
-//                        for (int i = 0; historyList.size() > i; i++) {
-//
-//                            ContentValues cv = new ContentValues();
-//
-//                            cv.put(Contract.HistoryEntry.COLUMN_QUOTE_KEY, quote.getStockId());
-//                            cv.put(Contract.HistoryEntry.COLUMN_SYMBOL, historyList.get(i).getSymbol());
-//                            cv.put(Contract.HistoryEntry.COLUMN_DATE, historyList.get(i).getDate().getTimeInMillis());
-//                            cv.put(Contract.HistoryEntry.COLUMN_OPEN, historyList.get(i).getOpen().doubleValue());
-//                            cv.put(Contract.HistoryEntry.COLUMN_HIGH, historyList.get(i).getHigh().doubleValue());
-//                            cv.put(Contract.HistoryEntry.COLUMN_LOW, historyList.get(i).getLow().doubleValue());
-//                            cv.put(Contract.HistoryEntry.COLUMN_CLOSE, historyList.get(i).getClose().doubleValue());
-//                            cv.put(Contract.HistoryEntry.COLUMN_VOLUME, historyList.get(i).getVolume());
-//                            cv.put(Contract.HistoryEntry.COLUMN_ADJ_CLOSE, historyList.get(i).getAdjClose().doubleValue());
-//                            cv.put(Contract.HistoryEntry.COLUMN_REGISTRY_TYPE, PrefUtils.getTimeInterval(context));
-//
-//                            cvArray[i] = cv;
-//                        }
-//                    }
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                if (null != cvArray && cvArray.length > 0) {
-//                    context.getContentResolver().delete(Contract.HistoryEntry.CONTENT_URI,
-//                            Contract.HistoryEntry.COLUMN_QUOTE_KEY + " = ?",
-//                            new String[]{Integer.toString(quote.getId())});
-//                    context.getContentResolver().bulkInsert(Contract.HistoryEntry.CONTENT_URI, cvArray);
-//                }
-//
-//            }
-//        }
-//    }
+
 
     public static void addHistory(Context context, String symbol) {
         ArrayList<MyQuote> quotesList;
