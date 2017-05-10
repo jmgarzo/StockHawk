@@ -48,6 +48,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     private int mPosition = RecyclerView.NO_POSITION;
     private static final String SELECTED_KEY = "selected_position";
+    private boolean mTwoPane=false;
 
 
     private static final int STOCK_LOADER = 0;
@@ -105,6 +106,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         final View rootView = inflater.inflate(R.layout.fragment_main_activity, container, false);
 
         ButterKnife.bind(this, rootView);
+
+        if (getActivity().findViewById(R.id.stock_detail_container) != null) {
+
+            mTwoPane = true;
+        }
 
         mAdapter = new StockAdapter(getActivity(), this);
 
@@ -188,7 +194,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             stockRecyclerView.smoothScrollToPosition(mPosition);
         }
 
-        if ( data.getCount() > 0 ) {
+        if ( mTwoPane && data.getCount() > 0 ) {
             stockRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
