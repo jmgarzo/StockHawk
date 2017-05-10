@@ -45,9 +45,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         }
         QuoteSyncJob.initialize(this);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, new MainActivityFragment())
-                .commit();
+        if(savedInstanceState==null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_main, new MainActivityFragment())
+                    .commit();
+        }
 
         ButterKnife.bind(this);
 

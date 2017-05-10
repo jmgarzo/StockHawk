@@ -22,9 +22,6 @@ import butterknife.ButterKnife;
 
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
-
-
-
     private final Context context;
     private final DecimalFormat dollarFormatWithPlus;
     private final DecimalFormat dollarFormat;
@@ -113,10 +110,11 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
         return count;
     }
 
-
-    interface StockAdapterOnClickHandler {
-        void onClick(String symbol,String Name);
+     interface StockAdapterOnClickHandler {
+        void onClick(int position,String mSymbol,String Name);
     }
+
+
 
     class StockViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -147,12 +145,21 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
             notifyItemChanged(selectedPos);
             int adapterPosition = getAdapterPosition();
             cursor.moveToPosition(adapterPosition);
-            String symbol= cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
+            String mSymbol= cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
             String name = cursor.getString(Contract.StockQuoteEntry.POSITION_NAME);
-            clickHandler.onClick(symbol,name);
+
+            clickHandler.onClick(selectedPos,mSymbol,name);
 
         }
 
 
     }
+
+    public void selectView(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof StockViewHolder) {
+            StockViewHolder svh = (StockViewHolder) viewHolder;
+            svh.onClick(svh.itemView);
+        }
+    }
+
 }

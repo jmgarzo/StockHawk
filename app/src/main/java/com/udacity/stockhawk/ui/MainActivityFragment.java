@@ -20,6 +20,8 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +46,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         void onItemSelected(String symbol,String name);
     }
 
+    private int mPosition = RecyclerView.NO_POSITION;
+    private static final String SELECTED_KEY = "selected_position";
+
+
     private static final int STOCK_LOADER = 0;
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.recycler_view)
@@ -60,9 +66,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public StockAdapter mAdapter;
 
     @Override
-    public void onClick(String symbol,String name) {
+    public void onClick(int position, String symbol,String name) {
         Timber.d("Symbol clicked: %s", symbol);
         ((Callback) getActivity()).onItemSelected(symbol,name);
+        mPosition = position;
     }
 
     @Override
@@ -83,6 +90,14 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         sp.unregisterOnSharedPreferenceChangeListener(this);
         super.onPause();
     }
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,8 +107,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         ButterKnife.bind(this, rootView);
 
         mAdapter = new StockAdapter(getActivity(), this);
+
+
+
         stockRecyclerView.setAdapter(mAdapter);
         stockRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
 
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);
@@ -132,6 +151,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             }
         });
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            // The listview probably hasn't even been populated yet.  Actually perform the
+            // swapout in onLoadFinished.
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
+
         updateEmptyView();
 
         return rootView;
@@ -156,7 +181,34 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             tvError.setVisibility(View.GONE);
         }
 
+
         mAdapter.setCursor(data);
+
+        if (mPosition != RecyclerView.NO_POSITION) {
+
+            stockRecyclerView.smoothScrollToPosition(mPosition);
+        }
+
+        if ( data.getCount() > 0 ) {
+            stockRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    // Since we know we're going to get items, we keep the listener around until
+                    // we see Children.
+                    if (stockRecyclerView.getChildCount() > 0) {
+                        stockRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        int itemPosition = mPosition;
+                        if (RecyclerView.NO_POSITION == itemPosition) itemPosition = 0;
+                        RecyclerView.ViewHolder vh = stockRecyclerView.findViewHolderForAdapterPosition(itemPosition);
+                        if (null != vh) {
+                            mAdapter.selectView(vh);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
