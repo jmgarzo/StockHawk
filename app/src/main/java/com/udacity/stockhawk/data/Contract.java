@@ -11,7 +11,6 @@ public final class Contract {
 
     static final String AUTHORITY = "com.udacity.stockhawk";
 
-
     static final String PATH_STOCK = "stock";
     static final String PATH_STOCK_WITH_SYMBOL = PATH_STOCK + "/*";
     static final String PATH_STOCK_WITH_ID =  PATH_STOCK + "/#";
@@ -30,8 +29,6 @@ public final class Contract {
 
     private Contract() {
     }
-
-
     public static final class StockEntry implements BaseColumns{
 
         public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_STOCK).build();
@@ -54,7 +51,6 @@ public final class Contract {
                 COLUMN_SYMBOL
         );
     }
-
 
     //@SuppressWarnings("unused")
     public static final class QuoteEntry implements BaseColumns {
@@ -83,8 +79,6 @@ public final class Contract {
                 COLUMN_PERCENTAGE_CHANGE
         );
 
-
-
         public static Uri makeUriForStock(String symbol) {
             return CONTENT_URI.buildUpon().appendPath(symbol).build();
         }
@@ -92,7 +86,6 @@ public final class Contract {
         static String getStockFromUri(Uri queryUri) {
             return queryUri.getLastPathSegment();
         }
-
 
     }
 
@@ -116,7 +109,6 @@ public final class Contract {
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + AUTHORITY + "/" + TABLE_NAME;
 
-
         public static final int POSITION_ID = 0;
         public static final int POSITION_QUOTE_KEY = 1;
         public static final int POSITION_SYMBOL=2;
@@ -128,7 +120,6 @@ public final class Contract {
         public static final int POSITION_VOLUME = 8;
         public static final int POSITION_ADJ_CLOSE = 9;
         public static final int POSITION_REGISTRY_TYPE = 10;
-
 
         public static final ImmutableList<String> HISTORY_COLUMNS = ImmutableList.of(
                 _ID,
@@ -178,7 +169,6 @@ public final class Contract {
         public static final int POSITION_PRICE = 6;
         public static final int POSITION_ABSOLUTE_CHANGE = 7;
         public static final int POSITION_PERCENTAGE_CHANGE = 8;
-
 
         public static final ImmutableList<String> STOCK_QUOTE_COLUMNS = ImmutableList.of(
                 COLUMN_STOCK_ID,
