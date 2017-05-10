@@ -44,7 +44,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         StockAdapter.StockAdapterOnClickHandler {
 
     private int mChoiceMode;
-    private boolean mAutoSelectView,mHoldForTransition;
+    private boolean mAutoSelectView, mHoldForTransition;
+    private static final String SELECTED_KEY = "selected_position";
+    private int mPosition = RecyclerView.NO_POSITION;
 
     public interface Callback {
 
@@ -98,7 +100,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         ButterKnife.bind(this, rootView);
 
-        mAdapter = new StockAdapter(getActivity(), this,mChoiceMode );
+        mAdapter = new StockAdapter(getActivity(), this, mChoiceMode);
         stockRecyclerView.setAdapter(mAdapter);
         stockRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -108,8 +110,11 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
         if (savedInstanceState != null) {
-            mAdapter.onRestoreInstanceState(savedInstanceState);
+            if (savedInstanceState.containsKey(SELECTED_KEY)) {
 
+                mPosition = savedInstanceState.getInt(SELECTED_KEY);
+            }
+            mAdapter.onRestoreInstanceState(savedInstanceState);
         }
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -151,6 +156,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onSaveInstanceState(Bundle outState) {
         // When tablets rotate, the currently selected list item needs to be saved.
+        if (mPosition != RecyclerView.NO_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
         mAdapter.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
@@ -172,47 +180,31 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         if (data.getCount() != 0) {
             tvError.setVisibility(View.GONE);
-        } else   {
-            stockRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                // Since we know we're going to get items, we keep the listener around until
-                // we see Children.
-                if (stockRecyclerView.getChildCount() > 0) {
-                    stockRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    int position = mAdapter.getSelectedItemPosition();
-                    if (position == RecyclerView.NO_POSITION &&
-                            -1 != mInitialSelectedDate) {
-                        Cursor data = mAdapter.getCursor();
-                        int count = data.getCount();
-                        int dateColumn = data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATE);
-                        for ( int i = 0; i < count; i++ ) {
-                            data.moveToPosition(i);
-                            if ( data.getLong(dateColumn) == mInitialSelectedDate ) {
-                                position = i;
-                                break;
-                            }
-                        }
-                    }
-                    if (position == RecyclerView.NO_POSITION) position = 0;
-                    // If we don't need to restart the loader, and there's a desired position to restore
-                    // to, do so now.
-                    stockRecyclerView.smoothScrollToPosition(position);
-                    RecyclerView.ViewHolder vh = stockRecyclerView.findViewHolderForAdapterPosition(position);
-                    if (null != vh && mAutoSelectView) {
-                        mAdapter.selectView(vh);
-                    }
-                    if ( mHoldForTransition ) {
-                        getActivity().supportStartPostponedEnterTransition();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
-    }
+        }
 
-        mAdapter.setCursor(data);
+        if (data.getCount() > 0) {
+            stockRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    // Since we know we're going to get items, we keep the listener around until
+                    // we see Children.
+                    if (stockRecyclerView.getChildCount() > 0) {
+                        stockRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        int itemPosition = mAdapter.getSelectedItemPosition();
+                        if (RecyclerView.NO_POSITION == itemPosition) itemPosition = 0;
+                        RecyclerView.ViewHolder vh = stockRecyclerView.findViewHolderForAdapterPosition(itemPosition);
+                        if (null != vh && mAutoSelectView) {
+                            mAdapter.selectView(vh);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
+
+            mAdapter.setCursor(data);
+        }
     }
 
     @Override

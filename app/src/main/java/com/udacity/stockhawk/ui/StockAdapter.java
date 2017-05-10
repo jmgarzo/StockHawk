@@ -2,11 +2,8 @@ package com.udacity.stockhawk.ui;
 
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.IntDef;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,16 +14,12 @@ import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.R.attr.choiceMode;
 
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
@@ -178,5 +171,12 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
 
     public int getSelectedItemPosition() {
         return mICM.getSelectedItemPosition();
+    }
+
+    public void selectView(RecyclerView.ViewHolder viewHolder) {
+        if ( viewHolder instanceof StockViewHolder ) {
+            StockViewHolder svh = (StockViewHolder)viewHolder;
+            svh.onClick(svh.itemView);
+        }
     }
 }
