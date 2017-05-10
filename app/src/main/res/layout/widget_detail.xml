@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/title_widget_detail"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title.Inverse"/>
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"/>
 
     </FrameLayout>
     <FrameLayout
