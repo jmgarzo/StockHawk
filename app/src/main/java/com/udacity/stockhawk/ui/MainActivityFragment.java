@@ -1,8 +1,10 @@
 package com.udacity.stockhawk.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -17,9 +19,12 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.AbsListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,10 +43,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         SwipeRefreshLayout.OnRefreshListener, SharedPreferences.OnSharedPreferenceChangeListener,
         StockAdapter.StockAdapterOnClickHandler {
 
+    private int mChoiceMode;
+    private boolean mAutoSelectView,mHoldForTransition;
 
     public interface Callback {
 
-        void onItemSelected(String symbol,String name);
+        void onItemSelected(String symbol, String name);
     }
 
     private static final int STOCK_LOADER = 0;
@@ -60,9 +67,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public StockAdapter mAdapter;
 
     @Override
-    public void onClick(String symbol,String name) {
+    public void onClick(String symbol, String name) {
         Timber.d("Symbol clicked: %s", symbol);
-        ((Callback) getActivity()).onItemSelected(symbol,name);
+        ((Callback) getActivity()).onItemSelected(symbol, name);
     }
 
     @Override
@@ -91,7 +98,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         ButterKnife.bind(this, rootView);
 
-        mAdapter = new StockAdapter(getActivity(), this);
+        mAdapter = new StockAdapter(getActivity(), this,mChoiceMode );
         stockRecyclerView.setAdapter(mAdapter);
         stockRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -100,7 +107,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
+        if (savedInstanceState != null) {
+            mAdapter.onRestoreInstanceState(savedInstanceState);
 
+        }
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -137,6 +147,14 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         return rootView;
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // When tablets rotate, the currently selected list item needs to be saved.
+        mAdapter.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -154,7 +172,45 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         if (data.getCount() != 0) {
             tvError.setVisibility(View.GONE);
-        }
+        } else   {
+            stockRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                // Since we know we're going to get items, we keep the listener around until
+                // we see Children.
+                if (stockRecyclerView.getChildCount() > 0) {
+                    stockRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    int position = mAdapter.getSelectedItemPosition();
+                    if (position == RecyclerView.NO_POSITION &&
+                            -1 != mInitialSelectedDate) {
+                        Cursor data = mAdapter.getCursor();
+                        int count = data.getCount();
+                        int dateColumn = data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATE);
+                        for ( int i = 0; i < count; i++ ) {
+                            data.moveToPosition(i);
+                            if ( data.getLong(dateColumn) == mInitialSelectedDate ) {
+                                position = i;
+                                break;
+                            }
+                        }
+                    }
+                    if (position == RecyclerView.NO_POSITION) position = 0;
+                    // If we don't need to restart the loader, and there's a desired position to restore
+                    // to, do so now.
+                    stockRecyclerView.smoothScrollToPosition(position);
+                    RecyclerView.ViewHolder vh = stockRecyclerView.findViewHolderForAdapterPosition(position);
+                    if (null != vh && mAutoSelectView) {
+                        mAdapter.selectView(vh);
+                    }
+                    if ( mHoldForTransition ) {
+                        getActivity().supportStartPostponedEnterTransition();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
 
         mAdapter.setCursor(data);
     }
@@ -239,5 +295,16 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 tvError.setVisibility(View.GONE);
             }
         }
+    }
+
+    @Override
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(activity, attrs, savedInstanceState);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.MainActivityFragment,
+                0, 0);
+        mChoiceMode = a.getInt(R.styleable.MainActivityFragment_android_choiceMode, AbsListView.CHOICE_MODE_NONE);
+        mAutoSelectView = a.getBoolean(R.styleable.MainActivityFragment_autoSelectView, false);
+        mHoldForTransition = a.getBoolean(R.styleable.MainActivityFragment_sharedElementTransitions, false);
+        a.recycle();
     }
 }

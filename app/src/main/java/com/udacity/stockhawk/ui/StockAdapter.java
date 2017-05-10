@@ -4,6 +4,8 @@ package com.udacity.stockhawk.ui;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,6 +26,8 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.R.attr.choiceMode;
+
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
 
 
@@ -35,10 +39,14 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
     private final DecimalFormat percentageFormat;
     private Cursor cursor;
     private final StockAdapterOnClickHandler clickHandler;
+    final private ItemChoiceManager mICM;
 
-    StockAdapter(Context context, StockAdapterOnClickHandler clickHandler) {
+
+    public StockAdapter(Context context, StockAdapterOnClickHandler clickHandler,int choiceMode) {
         this.context = context;
         this.clickHandler = clickHandler;
+        mICM = new ItemChoiceManager(this);
+        mICM.setChoiceMode(choiceMode);
 
         dollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
         dollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
@@ -71,10 +79,12 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
     @Override
     public void onBindViewHolder(StockViewHolder holder, int position) {
 
+
         cursor.moveToPosition(position);
 
         if(cursor.getDouble(Contract.StockQuoteEntry.POSITION_PRICE) ==- 1 && cursor.getDouble(Contract.StockQuoteEntry.POSITION_PERCENTAGE_CHANGE) == -1){
             holder.name.setText(context.getString(R.string.non_existent_value));
+
             holder.symbol.setText(cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL));
             holder.price.setText("");
             holder.change.setText("");
@@ -104,7 +114,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
             }
         }
 
-
+        mICM.onBindViewHolder(holder, position);
     }
 
     @Override
@@ -149,9 +159,24 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
             String symbol= cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
             String name = cursor.getString(Contract.StockQuoteEntry.POSITION_NAME);
             clickHandler.onClick(symbol,name);
+            mICM.onClick(this);
+
 
         }
 
 
+    }
+
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        mICM.onRestoreInstanceState(savedInstanceState);
+    }
+
+    public void onSaveInstanceState(Bundle outState) {
+        mICM.onSaveInstanceState(outState);
+    }
+
+
+    public int getSelectedItemPosition() {
+        return mICM.getSelectedItemPosition();
     }
 }
