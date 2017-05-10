@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
+    android:background="@drawable/touch_selector_pink"
     android:orientation="horizontal">
 
     <LinearLayout
