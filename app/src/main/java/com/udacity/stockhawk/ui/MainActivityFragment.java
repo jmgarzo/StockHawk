@@ -41,7 +41,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     public interface Callback {
 
-        void onItemSelected(String symbol);
+        void onItemSelected(String symbol,String name);
     }
 
     private static final int STOCK_LOADER = 0;
@@ -60,9 +60,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public StockAdapter mAdapter;
 
     @Override
-    public void onClick(String symbol) {
+    public void onClick(String symbol,String name) {
         Timber.d("Symbol clicked: %s", symbol);
-        ((Callback) getActivity()).onItemSelected(symbol);
+        ((Callback) getActivity()).onItemSelected(symbol,name);
     }
 
     @Override

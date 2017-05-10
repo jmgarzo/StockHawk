@@ -49,9 +49,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
 
     private String mSymbol;
+    private String mName;
     private ArrayList<History> mHistoryList;
     private static final int STOCK_LOADER = 11;
     public static final String SYMBOL_TAG = "symbol_tag";
+    public static final String NAME_TAG = "name_tag";
     public static final String TWO_PANE_TAG ="two_pane_tag";
 
 //    public static final String ID_QUOTE_TAG = "quote_tag";
@@ -109,6 +111,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         }else{
             mSymbol=getActivity().getIntent().getStringExtra(SYMBOL_TAG);
+            mName = getActivity().getIntent().getStringExtra(NAME_TAG);
+            if(mName != null && !mName.isEmpty()){
+                getActivity().setTitle(mName);
+            }
             twoPane= getActivity().getIntent().getBooleanExtra(TWO_PANE_TAG,false);
             getActivity().getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
             //getLoaderManager().restartLoader(STOCK_LOADER, null, this);

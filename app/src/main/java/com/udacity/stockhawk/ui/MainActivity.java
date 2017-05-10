@@ -111,9 +111,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
 
     @Override
-    public void onItemSelected(String symbol) {
+    public void onItemSelected(String symbol,String name) {
         Bundle args = new Bundle();
         args.putString(DetailFragment.SYMBOL_TAG, symbol);
+        args.putString(DetailFragment.NAME_TAG,name);
         args.putBoolean(DetailFragment.TWO_PANE_TAG,mTwoPane);
         if (mTwoPane) {
             DetailFragment fragment = new DetailFragment();

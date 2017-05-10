@@ -118,7 +118,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
 
 
     interface StockAdapterOnClickHandler {
-        void onClick(String symbol);
+        void onClick(String symbol,String Name);
     }
 
     class StockViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -147,7 +147,8 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
             int adapterPosition = getAdapterPosition();
             cursor.moveToPosition(adapterPosition);
             String symbol= cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
-            clickHandler.onClick(symbol);
+            String name = cursor.getString(Contract.StockQuoteEntry.POSITION_NAME);
+            clickHandler.onClick(symbol,name);
 
         }
 
