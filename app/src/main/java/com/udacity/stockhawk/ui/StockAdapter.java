@@ -2,9 +2,7 @@ package com.udacity.stockhawk.ui;
 
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.support.annotation.IntDef;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +13,6 @@ import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -35,6 +31,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
     private final DecimalFormat percentageFormat;
     private Cursor cursor;
     private final StockAdapterOnClickHandler clickHandler;
+    private int selectedPos = 0;
 
     StockAdapter(Context context, StockAdapterOnClickHandler clickHandler) {
         this.context = context;
@@ -70,7 +67,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
 
     @Override
     public void onBindViewHolder(StockViewHolder holder, int position) {
-
+        holder.itemView.setSelected(selectedPos == position);
         cursor.moveToPosition(position);
 
         if(cursor.getDouble(Contract.StockQuoteEntry.POSITION_PRICE) ==- 1 && cursor.getDouble(Contract.StockQuoteEntry.POSITION_PERCENTAGE_CHANGE) == -1){
@@ -144,6 +141,10 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHol
 
         @Override
         public void onClick(View v) {
+
+            notifyItemChanged(selectedPos);
+            selectedPos = getLayoutPosition();
+            notifyItemChanged(selectedPos);
             int adapterPosition = getAdapterPosition();
             cursor.moveToPosition(adapterPosition);
             String symbol= cursor.getString(Contract.StockQuoteEntry.POSITION_SYMBOL);
